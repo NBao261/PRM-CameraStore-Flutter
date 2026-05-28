@@ -1,0 +1,1 @@
+// Product repository contract

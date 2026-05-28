@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+.idea/
+.vscode/
+camera-store-app/.pub-cache/
+camera-store-app/.dart_tool/
+camera-store-app/build/
+camera-store-backend/node_modules/
+camera-store-backend/dist/
