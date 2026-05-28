@@ -21,6 +21,7 @@ class AuthRemoteDataSource {
         'email': email,
         'phone': phone,
         'password': password,
+        'confirmPassword': password,
       },
     );
   }
