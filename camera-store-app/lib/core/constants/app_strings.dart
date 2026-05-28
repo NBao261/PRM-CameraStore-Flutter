@@ -27,4 +27,23 @@ class AppStrings {
   // Error
   static const String unknownError = 'Đã có lỗi xảy ra. Vui lòng thử lại.';
   static const String networkError = 'Không có kết nối mạng.';
+
+  // Products
+  static const String products = 'Sản phẩm';
+  static const String searchProducts = 'Tìm kiếm máy ảnh...';
+  static const String noProducts = 'Không tìm thấy sản phẩm nào';
+  static const String filter = 'Bộ lọc';
+  static const String clearFilter = 'Xóa bộ lọc';
+  static const String apply = 'Áp dụng';
+  static const String category = 'Danh mục';
+  static const String priceRange = 'Khoảng giá (VNĐ)';
+  static const String allCategories = 'Tất cả';
+  static const String inStock = 'Còn hàng';
+  static const String outOfStock = 'Hết hàng';
+  static const String addToCart = 'Thêm vào giỏ hàng';
+  static const String productOutOfStock = 'Sản phẩm hết hàng';
+  static const String addedToCart = 'Đã thêm vào giỏ hàng!';
+  static const String specs = 'Thông số kỹ thuật';
+  static const String description = 'Mô tả sản phẩm';
+  static const String warranty = 'Bảo hành';
 }
