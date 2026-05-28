@@ -13,7 +13,10 @@ import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/product/data/datasources/product_remote_datasource.dart';
 import 'features/product/data/repositories/product_repository_impl.dart';
 import 'features/product/presentation/bloc/product_bloc.dart';
-import 'features/product/presentation/bloc/product_event.dart';
+import 'features/cart/data/datasources/cart_remote_datasource.dart';
+import 'features/cart/data/repositories/cart_repository_impl.dart';
+import 'features/cart/presentation/bloc/cart_bloc.dart';
+import 'features/cart/presentation/bloc/cart_event.dart';
 import 'features/product/presentation/screens/product_list_screen.dart';
 
 void main() {
@@ -33,6 +36,9 @@ class CameraStoreApp extends StatelessWidget {
     final productRemoteDataSource = ProductRemoteDataSource(apiClient);
     final productRepository = ProductRepositoryImpl(productRemoteDataSource);
 
+    final cartRemoteDataSource = CartRemoteDataSourceImpl(apiClient);
+    final cartRepository = CartRepositoryImpl(cartRemoteDataSource);
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -40,6 +46,9 @@ class CameraStoreApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => ProductBloc(productRepository),
+        ),
+        BlocProvider(
+          create: (_) => CartBloc(cartRepository: cartRepository),
         ),
       ],
       child: MaterialApp(
@@ -58,6 +67,8 @@ class CameraStoreApp extends StatelessWidget {
             }
 
             if (state.status == AuthStatus.authenticated) {
+              // Load cart when user is authenticated
+              context.read<CartBloc>().add(const CartLoadRequested());
               return const ProductListScreen();
             }
 
