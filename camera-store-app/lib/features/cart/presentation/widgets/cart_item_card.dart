@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/cart_item_entity.dart';
 
@@ -33,14 +34,14 @@ class CartItemCard extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -48,32 +49,36 @@ class CartItemCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Product Image
+          // ── Product Image ────────────────────────
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             child: Container(
-              width: 90,
-              height: 90,
-              color: AppColors.background,
+              width: 96,
+              height: 96,
+              color: AppColors.surfaceDim,
               child: product.firstImage.isNotEmpty
                   ? Image.network(
                       product.firstImage,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => const Center(
-                        child: Icon(Icons.camera_alt_outlined, color: AppColors.textHint),
+                        child: Icon(Icons.camera_alt_outlined,
+                            color: AppColors.textHint, size: 28),
                       ),
                     )
                   : const Center(
-                      child: Icon(Icons.camera_alt_outlined, color: AppColors.textHint),
+                      child: Icon(Icons.camera_alt_outlined,
+                          color: AppColors.textHint, size: 28),
                     ),
             ),
           ),
-          const SizedBox(width: 12),
-          // Product Info
+          const SizedBox(width: 14),
+
+          // ── Product Info ─────────────────────────
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Brand
                 if (product.brandName != null)
                   Text(
                     product.brandName!.toUpperCase(),
@@ -81,14 +86,16 @@ class CartItemCard extends StatelessWidget {
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textHint,
-                      letterSpacing: 0.5,
+                      letterSpacing: 0.8,
                     ),
                   ),
                 const SizedBox(height: 4),
+
+                // Name — 15sp for readability (mobile-typography.md)
                 Text(
                   product.name,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                     height: 1.3,
@@ -97,25 +104,42 @@ class CartItemCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                // Stock info
-                Text(
-                  'Kho: ${product.stock}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: product.stock <= 3 ? AppColors.error : AppColors.textHint,
-                    fontWeight: product.stock <= 3 ? FontWeight.w600 : FontWeight.w400,
+
+                // Stock indicator
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: product.stock <= 3
+                        ? AppColors.errorLight
+                        : AppColors.surfaceDim,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    product.stock <= 3
+                        ? 'Còn ${product.stock} sản phẩm'
+                        : 'Kho: ${product.stock}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: product.stock <= 3
+                          ? AppColors.error
+                          : AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
+
                 // Price
                 Row(
                   children: [
                     Text(
                       _formatPrice(unitPrice),
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: FontWeight.w800,
-                        color: product.hasDiscount ? AppColors.accent : AppColors.primary,
+                        color: product.hasDiscount
+                            ? AppColors.accent
+                            : AppColors.primary,
                       ),
                     ),
                     if (product.hasDiscount) ...[
@@ -123,7 +147,7 @@ class CartItemCard extends StatelessWidget {
                       Text(
                         _formatPrice(product.price),
                         style: const TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           color: AppColors.textHint,
                           decoration: TextDecoration.lineThrough,
                         ),
@@ -132,62 +156,79 @@ class CartItemCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Quantity Controller + Line Total
+
+                // ── Quantity Controller + Line Total ──
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Quantity Controller
+                    // Quantity Controller — 48dp touch targets
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: AppColors.surfaceDim,
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildQuantityButton(
-                            icon: item.quantity <= 1 ? Icons.delete_outline : Icons.remove,
-                            color: item.quantity <= 1 ? AppColors.error : AppColors.textSecondary,
-                            onTap: onDecrement,
+                          _QuantityButton(
+                            icon: item.quantity <= 1
+                                ? Icons.delete_outline
+                                : Icons.remove,
+                            color: item.quantity <= 1
+                                ? AppColors.error
+                                : AppColors.textSecondary,
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              onDecrement();
+                            },
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              '${item.quantity}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            transitionBuilder: (child, anim) =>
+                                ScaleTransition(scale: anim, child: child),
+                            child: Padding(
+                              key: ValueKey(item.quantity),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14),
+                              child: Text(
+                                '${item.quantity}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
                             ),
                           ),
-                          _buildQuantityButton(
+                          _QuantityButton(
                             icon: Icons.add,
                             color: isAtMaxStock
-                                ? AppColors.textHint.withOpacity(0.4)
+                                ? AppColors.textHint.withOpacity(0.3)
                                 : AppColors.primary,
-                            onTap: isAtMaxStock
-                                ? () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Chỉ còn ${product.stock} sản phẩm trong kho'),
-                                        backgroundColor: AppColors.error,
-                                        behavior: SnackBarBehavior.floating,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10)),
-                                      ),
-                                    );
-                                  }
-                                : onIncrement,
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              if (isAtMaxStock) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'Chỉ còn ${product.stock} sản phẩm trong kho'),
+                                    backgroundColor: AppColors.warning,
+                                  ),
+                                );
+                                return;
+                              }
+                              onIncrement();
+                            },
                           ),
                         ],
                       ),
                     ),
+
                     // Line Total
                     Text(
                       _formatPrice(lineTotal),
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primary,
                       ),
@@ -201,20 +242,33 @@ class CartItemCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildQuantityButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+/// 48dp touch target button (touch-psychology.md: min 48dp)
+class _QuantityButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _QuantityButton({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(100),
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          child: Icon(icon, size: 18, color: color),
+        child: SizedBox(
+          width: 44, // 44dp visual + padding = 48dp hit area
+          height: 44,
+          child: Center(
+            child: Icon(icon, size: 20, color: color),
+          ),
         ),
       ),
     );

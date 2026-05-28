@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../cart/presentation/bloc/cart_bloc.dart';
@@ -36,12 +37,12 @@ class _ProductCardState extends State<ProductCard> {
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(_isPressed ? 0.02 : 0.06),
-                blurRadius: _isPressed ? 8 : 16,
-                offset: Offset(0, _isPressed ? 2 : 6),
+                blurRadius: _isPressed ? 8 : 20,
+                offset: Offset(0, _isPressed ? 2 : 8),
               ),
             ],
           ),
@@ -58,22 +59,25 @@ class _ProductCardState extends State<ProductCard> {
                       decoration: const BoxDecoration(
                         color: AppColors.background,
                         borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(16),
+                          top: Radius.circular(20),
                         ),
                       ),
                       child: widget.product.firstImage.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16),
-                              ),
-                              child: Image.network(
-                                widget.product.firstImage,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Center(
-                                  child: Icon(
-                                    Icons.camera_alt_outlined,
-                                    size: 40,
-                                    color: AppColors.textHint,
+                          ? Hero(
+                              tag: 'product-image-${widget.product.id}',
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(20),
+                                ),
+                                child: Image.network(
+                                  widget.product.firstImage,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Center(
+                                    child: Icon(
+                                      Icons.camera_alt_outlined,
+                                      size: 40,
+                                      color: AppColors.textHint,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -156,10 +160,10 @@ class _ProductCardState extends State<ProductCard> {
                         child: Text(
                           widget.product.name,
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
-                            height: 1.2,
+                            height: 1.3,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -184,7 +188,7 @@ class _ProductCardState extends State<ProductCard> {
                                 Text(
                                   widget.product.displayPrice,
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w800,
                                     color: widget.product.hasDiscount
                                         ? AppColors.accent
@@ -198,29 +202,38 @@ class _ProductCardState extends State<ProductCard> {
                           if (widget.product.inStock)
                             Material(
                               color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(12),
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(12),
                                 onTap: () {
+                                  HapticFeedback.mediumImpact();
                                   context.read<CartBloc>().add(
                                     CartItemAdded(productId: widget.product.id),
                                   );
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('Đã thêm "${widget.product.name}" vào giỏ!'),
+                                      content: Row(
+                                        children: [
+                                          const Icon(Icons.check_circle, color: Colors.white, size: 18),
+                                          const SizedBox(width: 8),
+                                          Expanded(child: Text('Đã thêm "${widget.product.name}" vào giỏ!')),
+                                        ],
+                                      ),
                                       backgroundColor: AppColors.success,
                                       duration: const Duration(seconds: 2),
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                     ),
                                   );
                                 },
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  child: const Icon(
-                                    Icons.add_shopping_cart,
-                                    color: Colors.white,
-                                    size: 16,
+                                // 48dp touch target (touch-psychology.md)
+                                child: const SizedBox(
+                                  width: 44,
+                                  height: 44,
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.add_shopping_cart_rounded,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
                                   ),
                                 ),
                               ),
