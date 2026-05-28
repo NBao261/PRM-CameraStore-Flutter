@@ -29,6 +29,7 @@ class CartItemCard extends StatelessWidget {
     final product = item.product;
     final unitPrice = product.hasDiscount ? product.salePrice! : product.price;
     final lineTotal = unitPrice * item.quantity;
+    final isAtMaxStock = item.quantity >= product.stock;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -95,7 +96,17 @@ class CartItemCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
+                // Stock info
+                Text(
+                  'Kho: ${product.stock}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: product.stock <= 3 ? AppColors.error : AppColors.textHint,
+                    fontWeight: product.stock <= 3 ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 6),
                 // Price
                 Row(
                   children: [
@@ -152,8 +163,22 @@ class CartItemCard extends StatelessWidget {
                           ),
                           _buildQuantityButton(
                             icon: Icons.add,
-                            color: AppColors.primary,
-                            onTap: onIncrement,
+                            color: isAtMaxStock
+                                ? AppColors.textHint.withOpacity(0.4)
+                                : AppColors.primary,
+                            onTap: isAtMaxStock
+                                ? () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Chỉ còn ${product.stock} sản phẩm trong kho'),
+                                        backgroundColor: AppColors.error,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10)),
+                                      ),
+                                    );
+                                  }
+                                : onIncrement,
                           ),
                         ],
                       ),

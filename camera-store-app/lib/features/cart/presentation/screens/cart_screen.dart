@@ -42,157 +42,210 @@ class _CartScreenState extends State<CartScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: BlocBuilder<CartBloc, CartState>(
-        builder: (context, state) {
-          if (state.status == CartStatus.loading && state.cart == null) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
-          }
-
-          if (state.status == CartStatus.error && state.cart == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: AppColors.error),
-                  const SizedBox(height: 16),
-                  Text(
-                    state.errorMessage ?? 'Không thể tải giỏ hàng',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () => context.read<CartBloc>().add(const CartLoadRequested()),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Thử lại'),
-                  ),
-                ],
+      body: BlocListener<CartBloc, CartState>(
+        listenWhen: (prev, curr) => curr.status == CartStatus.error && curr.errorMessage != prev.errorMessage,
+        listener: (context, state) {
+          if (state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage!),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             );
+            // Reload cart to get fresh state
+            context.read<CartBloc>().add(const CartLoadRequested());
           }
+        },
+        child: BlocBuilder<CartBloc, CartState>(
+          builder: (context, state) {
+            if (state.status == CartStatus.loading && state.cart == null) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              );
+            }
 
-          final items = state.cart?.items ?? [];
-
-          if (items.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.shopping_cart_outlined,
-                    size: 100,
-                    color: AppColors.textHint.withOpacity(0.4),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Giỏ hàng trống',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+            if (state.status == CartStatus.error && state.cart == null) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        state.errorMessage ?? 'Không thể tải giỏ hàng',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Hãy thêm sản phẩm yêu thích vào giỏ hàng nhé!',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: AppColors.textSecondary,
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => context.read<CartBloc>().add(const CartLoadRequested()),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Thử lại'),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: 200,
-                    child: ElevatedButton.icon(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Tiếp tục mua sắm'),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 120), // Extra bottom for sticky bar
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return Dismissible(
-                key: ValueKey(item.product.id),
-                direction: DismissDirection.endToStart,
-                background: Container(
-                  alignment: Alignment.centerRight,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.only(right: 24),
-                  decoration: BoxDecoration(
-                    color: AppColors.error,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+                  ],
                 ),
-                confirmDismiss: (direction) async {
-                  return await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      title: const Text('Xóa sản phẩm?'),
-                      content: Text('Bạn có chắc muốn xóa "${item.product.name}" khỏi giỏ hàng?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx, false),
-                          child: const Text('Hủy'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx, true),
-                          style: TextButton.styleFrom(foregroundColor: AppColors.error),
-                          child: const Text('Xóa'),
-                        ),
-                      ],
+              );
+            }
+
+            final items = state.cart?.items ?? [];
+
+            if (items.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.shopping_cart_outlined,
+                      size: 100,
+                      color: AppColors.textHint.withOpacity(0.4),
                     ),
-                  ) ?? false;
-                },
-                onDismissed: (_) {
-                  context.read<CartBloc>().add(CartItemRemoved(productId: item.product.id));
-                },
-                child: CartItemCard(
-                  item: item,
-                  onIncrement: () {
-                    context.read<CartBloc>().add(
-                          CartItemUpdated(
-                            productId: item.product.id,
-                            quantity: item.quantity + 1,
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Giỏ hàng trống',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Hãy thêm sản phẩm yêu thích vào giỏ hàng nhé!',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: 200,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('Tiếp tục mua sắm'),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return Dismissible(
+                  key: ValueKey(item.product.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.only(right: 24),
+                    decoration: BoxDecoration(
+                      color: AppColors.error,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        title: const Text('Xóa sản phẩm?'),
+                        content: Text('Bạn có chắc muốn xóa "${item.product.name}" khỏi giỏ hàng?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text('Hủy'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                            child: const Text('Xóa'),
+                          ),
+                        ],
+                      ),
+                    ) ?? false;
+                  },
+                  onDismissed: (_) {
+                    context.read<CartBloc>().add(CartItemRemoved(productId: item.product.id));
+                  },
+                  child: CartItemCard(
+                    item: item,
+                    onIncrement: () {
+                      // Frontend stock validation
+                      if (item.quantity >= item.product.stock) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Chỉ còn ${item.product.stock} sản phẩm trong kho'),
+                            backgroundColor: AppColors.error,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
                         );
-                  },
-                  onDecrement: () {
-                    if (item.quantity <= 1) {
-                      // Remove
-                      context.read<CartBloc>().add(
-                            CartItemRemoved(productId: item.product.id),
-                          );
-                    } else {
+                        return;
+                      }
                       context.read<CartBloc>().add(
                             CartItemUpdated(
                               productId: item.product.id,
-                              quantity: item.quantity - 1,
+                              quantity: item.quantity + 1,
                             ),
                           );
-                    }
-                  },
-                  onRemove: () {
-                    context.read<CartBloc>().add(
-                          CartItemRemoved(productId: item.product.id),
+                    },
+                    onDecrement: () {
+                      if (item.quantity <= 1) {
+                        // Confirm before removing
+                        showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            title: const Text('Xóa sản phẩm?'),
+                            content: Text('Xóa "${item.product.name}" khỏi giỏ hàng?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Hủy'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(ctx, true);
+                                  context.read<CartBloc>().add(
+                                        CartItemRemoved(productId: item.product.id),
+                                      );
+                                },
+                                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                                child: const Text('Xóa'),
+                              ),
+                            ],
+                          ),
                         );
-                  },
-                ),
-              );
-            },
-          );
-        },
+                      } else {
+                        context.read<CartBloc>().add(
+                              CartItemUpdated(
+                                productId: item.product.id,
+                                quantity: item.quantity - 1,
+                              ),
+                            );
+                      }
+                    },
+                    onRemove: () {
+                      context.read<CartBloc>().add(
+                            CartItemRemoved(productId: item.product.id),
+                          );
+                    },
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
 
       // STICKY BOTTOM BAR
