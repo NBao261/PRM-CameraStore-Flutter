@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/cart_repository.dart';
 import 'cart_event.dart';
@@ -13,6 +14,16 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<CartItemRemoved>(_onCartItemRemoved);
   }
 
+  String _parseError(dynamic e) {
+    if (e is DioException) {
+      if (e.response?.data is Map) {
+        return e.response?.data['message'] ?? 'Lỗi kết nối server';
+      }
+      return 'Lỗi kết nối server (${e.response?.statusCode ?? "timeout"})';
+    }
+    return e.toString();
+  }
+
   Future<void> _onCartLoadRequested(
     CartLoadRequested event,
     Emitter<CartState> emit,
@@ -24,7 +35,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: _parseError(e),
       ));
     }
   }
@@ -39,7 +50,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: _parseError(e),
       ));
     }
   }
@@ -54,7 +65,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: _parseError(e),
       ));
     }
   }
@@ -69,7 +80,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: _parseError(e),
       ));
     }
   }

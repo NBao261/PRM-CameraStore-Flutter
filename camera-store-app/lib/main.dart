@@ -56,24 +56,30 @@ class CameraStoreApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         onGenerateRoute: AppRouter.onGenerateRoute,
-        home: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            if (state.status == AuthStatus.initial) {
-              return const Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            }
-
+        home: BlocListener<AuthBloc, AuthState>(
+          listenWhen: (prev, curr) => prev.status != curr.status,
+          listener: (context, state) {
             if (state.status == AuthStatus.authenticated) {
-              // Load cart when user is authenticated
               context.read<CartBloc>().add(const CartLoadRequested());
-              return const ProductListScreen();
             }
-
-            return const LoginScreen();
           },
+          child: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              if (state.status == AuthStatus.initial) {
+                return const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              if (state.status == AuthStatus.authenticated) {
+                return const ProductListScreen();
+              }
+
+              return const LoginScreen();
+            },
+          ),
         ),
       ),
     );

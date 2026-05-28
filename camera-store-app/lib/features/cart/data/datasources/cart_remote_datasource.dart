@@ -13,32 +13,44 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
   CartRemoteDataSourceImpl(this.apiClient);
 
+  CartModel _parseResponse(dynamic responseData) {
+    if (responseData is Map<String, dynamic>) {
+      if (responseData.containsKey('data') && responseData['data'] != null) {
+        return CartModel.fromJson(responseData['data']);
+      }
+      if (responseData.containsKey('_id')) {
+        return CartModel.fromJson(responseData);
+      }
+    }
+    throw Exception('Unexpected response format');
+  }
+
   @override
   Future<CartModel> getCart() async {
-    final response = await apiClient.dio.get('/api/cart');
-    return CartModel.fromJson(response.data['data']);
+    final response = await apiClient.dio.get('/cart');
+    return _parseResponse(response.data);
   }
 
   @override
   Future<CartModel> addToCart(String productId, int quantity) async {
-    final response = await apiClient.dio.post('/api/cart', data: {
+    final response = await apiClient.dio.post('/cart', data: {
       'productId': productId,
       'quantity': quantity,
     });
-    return CartModel.fromJson(response.data['data']);
+    return _parseResponse(response.data);
   }
 
   @override
   Future<CartModel> updateCartItem(String productId, int quantity) async {
-    final response = await apiClient.dio.put('/api/cart/$productId', data: {
+    final response = await apiClient.dio.put('/cart/$productId', data: {
       'quantity': quantity,
     });
-    return CartModel.fromJson(response.data['data']);
+    return _parseResponse(response.data);
   }
 
   @override
   Future<CartModel> removeFromCart(String productId) async {
-    final response = await apiClient.dio.delete('/api/cart/$productId');
-    return CartModel.fromJson(response.data['data']);
+    final response = await apiClient.dio.delete('/cart/$productId');
+    return _parseResponse(response.data);
   }
 }
