@@ -15,13 +15,13 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
   @override
   Future<CartModel> getCart() async {
-    final response = await apiClient.get('/api/cart');
+    final response = await apiClient.dio.get('/api/cart');
     return CartModel.fromJson(response.data['data']);
   }
 
   @override
   Future<CartModel> addToCart(String productId, int quantity) async {
-    final response = await apiClient.post('/api/cart', data: {
+    final response = await apiClient.dio.post('/api/cart', data: {
       'productId': productId,
       'quantity': quantity,
     });
@@ -30,7 +30,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
   @override
   Future<CartModel> updateCartItem(String productId, int quantity) async {
-    final response = await apiClient.put('/api/cart/$productId', data: {
+    final response = await apiClient.dio.put('/api/cart/$productId', data: {
       'quantity': quantity,
     });
     return CartModel.fromJson(response.data['data']);
@@ -38,7 +38,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
   @override
   Future<CartModel> removeFromCart(String productId) async {
-    final response = await apiClient.delete('/api/cart/$productId');
+    final response = await apiClient.dio.delete('/api/cart/$productId');
     return CartModel.fromJson(response.data['data']);
   }
 }

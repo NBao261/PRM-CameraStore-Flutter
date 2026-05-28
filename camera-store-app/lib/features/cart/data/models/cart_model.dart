@@ -12,7 +12,7 @@ class CartModel extends CartEntity {
   factory CartModel.fromJson(Map<String, dynamic> json) {
     return CartModel(
       id: json['_id'] ?? '',
-      userId: json['user'] ?? '',
+      userId: json['user'] is Map ? json['user']['_id'] ?? '' : json['user'] ?? '',
       items: (json['items'] as List<dynamic>?)
               ?.map((item) => CartItemModel.fromJson(item))
               .toList() ??
@@ -21,14 +21,5 @@ class CartModel extends CartEntity {
           ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'user': userId,
-      'items': items.map((item) => (item as CartItemModel).toJson()).toList(),
-      'updatedAt': updatedAt.toIso8601String(),
-    };
   }
 }

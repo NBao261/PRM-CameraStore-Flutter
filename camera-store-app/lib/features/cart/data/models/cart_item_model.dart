@@ -13,11 +13,4 @@ class CartItemModel extends CartItemEntity {
       quantity: json['quantity'] as int,
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'product': (product as ProductModel).toJson(),
-      'quantity': quantity,
-    };
-  }
 }
