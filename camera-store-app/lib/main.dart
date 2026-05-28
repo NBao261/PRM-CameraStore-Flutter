@@ -10,6 +10,11 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/product/data/datasources/product_remote_datasource.dart';
+import 'features/product/data/repositories/product_repository_impl.dart';
+import 'features/product/presentation/bloc/product_bloc.dart';
+import 'features/product/presentation/bloc/product_event.dart';
+import 'features/product/presentation/screens/product_list_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,10 +30,16 @@ class CameraStoreApp extends StatelessWidget {
     final authRemoteDataSource = AuthRemoteDataSource(apiClient);
     final authRepository = AuthRepositoryImpl(authRemoteDataSource, apiClient);
 
+    final productRemoteDataSource = ProductRemoteDataSource(apiClient);
+    final productRepository = ProductRepositoryImpl(productRemoteDataSource);
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (_) => AuthBloc(authRepository)..add(AuthCheckRequested()),
+        ),
+        BlocProvider(
+          create: (_) => ProductBloc(productRepository),
         ),
       ],
       child: MaterialApp(
@@ -39,7 +50,6 @@ class CameraStoreApp extends StatelessWidget {
         home: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             if (state.status == AuthStatus.initial) {
-              // Splash / checking auth
               return const Scaffold(
                 body: Center(
                   child: CircularProgressIndicator(),
@@ -48,29 +58,7 @@ class CameraStoreApp extends StatelessWidget {
             }
 
             if (state.status == AuthStatus.authenticated) {
-              // TODO: Replace with HomeScreen in Week 2
-              return Scaffold(
-                appBar: AppBar(title: const Text(AppStrings.appName)),
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Xin chào, ${state.user?.fullName ?? "User"}!',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          context.read<AuthBloc>().add(AuthLogoutRequested());
-                        },
-                        icon: const Icon(Icons.logout),
-                        label: const Text(AppStrings.logout),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return const ProductListScreen();
             }
 
             return const LoginScreen();
