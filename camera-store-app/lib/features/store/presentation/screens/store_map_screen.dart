@@ -1,0 +1,1 @@
+// Store map screen
