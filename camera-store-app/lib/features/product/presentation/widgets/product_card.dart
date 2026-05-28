@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../cart/presentation/bloc/cart_bloc.dart';
+import '../../../cart/presentation/bloc/cart_event.dart';
 import '../../domain/entities/product_entity.dart';
 
 class ProductCard extends StatefulWidget {
@@ -199,7 +202,18 @@ class _ProductCardState extends State<ProductCard> {
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(10),
                                 onTap: () {
-                                  // TODO: Dispatch Add to Cart event
+                                  context.read<CartBloc>().add(
+                                    CartItemAdded(productId: widget.product.id),
+                                  );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Đã thêm "${widget.product.name}" vào giỏ!'),
+                                      backgroundColor: AppColors.success,
+                                      duration: const Duration(seconds: 2),
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                  );
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.all(8),

@@ -1,7 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../cart/presentation/bloc/cart_bloc.dart';
+import '../../../cart/presentation/bloc/cart_event.dart';
 import '../../data/datasources/product_remote_datasource.dart';
 import '../../data/repositories/product_repository_impl.dart';
 import '../../domain/entities/product_entity.dart';
@@ -358,11 +361,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       child: ElevatedButton(
                         onPressed: product.inStock
                             ? () {
+                                context.read<CartBloc>().add(
+                                  CartItemAdded(productId: product.id),
+                                );
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Đã thêm vào giỏ hàng!'),
+                                  SnackBar(
+                                    content: Text('Đã thêm "${product.name}" vào giỏ hàng!'),
                                     backgroundColor: AppColors.success,
-                                    duration: Duration(seconds: 2),
+                                    duration: const Duration(seconds: 2),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                   ),
                                 );
                               }
