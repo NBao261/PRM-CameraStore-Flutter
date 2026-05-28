@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -78,53 +79,89 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(AppStrings.appName),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              context.read<AuthBloc>().add(AuthLogoutRequested());
-            },
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: AppBar(
+              title: const Text(
+                AppStrings.appName,
+                style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1),
+              ),
+              backgroundColor: AppColors.primary.withOpacity(0.85),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: () {
+                    context.read<AuthBloc>().add(AuthLogoutRequested());
+                  },
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
       body: Column(
         children: [
-          // Search bar + Filter button (Thumb zone friendly)
+          // Header with Search bar + Filter button
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            color: AppColors.primary,
+            padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 70, 20, 24),
+            decoration: const BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 20,
+                  offset: Offset(0, 10),
+                )
+              ],
+            ),
             child: Row(
-               crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(100), // Pill shape
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
                     child: TextField(
                       controller: _searchController,
                       onChanged: _onSearchChanged,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         hintText: 'Tìm kiếm máy ảnh...',
-                        prefixIcon: const Icon(Icons.search,
-                            color: AppColors.textHint),
+                        prefixIcon: const Padding(
+                          padding: EdgeInsets.only(left: 12),
+                          child: Icon(Icons.search, color: AppColors.textHint),
+                        ),
                         suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear, color: AppColors.textSecondary),
-                                onPressed: _clearSearch,
+                            ? Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: IconButton(
+                                  icon: const Icon(Icons.cancel, color: AppColors.textSecondary),
+                                  onPressed: _clearSearch,
+                                ),
                               )
                             : null,
                         border: InputBorder.none,
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 16),
-                        hintStyle:
-                            const TextStyle(color: AppColors.textHint),
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                        hintStyle: const TextStyle(color: AppColors.textHint),
                       ),
                     ),
                   ),
@@ -134,20 +171,40 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   buildWhen: (prev, curr) =>
                       prev.hasActiveFilters != curr.hasActiveFilters,
                   builder: (context, state) {
-                    return Material(
-                      color: state.hasActiveFilters
-                          ? AppColors.accent
-                          : Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(16),
-                      child: InkWell(
-                        onTap: _showFilterSheet,
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          child: const Icon(
-                            Icons.tune,
-                            color: Colors.white,
-                            size: 24,
+                     return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      decoration: BoxDecoration(
+                        gradient: state.hasActiveFilters
+                            ? const LinearGradient(
+                                colors: [Color(0xFFF97316), Color(0xFFEA580C)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                            : null,
+                        color: state.hasActiveFilters ? null : Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(100),
+                        boxShadow: state.hasActiveFilters
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.accent.withOpacity(0.4),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                )
+                              ]
+                            : [],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _showFilterSheet,
+                          borderRadius: BorderRadius.circular(100),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            child: const Icon(
+                              Icons.tune,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ),
                         ),
                       ),
@@ -249,13 +306,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         .add(const ProductLoadRequested());
                   },
                   child: GridView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.58, // Adjusted for taller card
-                      crossAxisSpacing: 16, // More breathing room
-                      mainAxisSpacing: 16, // More breathing room
+                      childAspectRatio: 0.58,
+                      crossAxisSpacing: 16, 
+                      mainAxisSpacing: 20, 
                     ),
                     itemCount: state.products.length,
                     itemBuilder: (context, index) {
