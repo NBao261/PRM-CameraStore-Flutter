@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -259,11 +260,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
             child: BlocBuilder<ProductBloc, ProductState>(
               builder: (context, state) {
                 if (state.status == ProductStatus.loading) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                    ),
-                  );
+                  return const ProductGridSkeleton(itemCount: 6);
                 }
 
                 if (state.status == ProductStatus.error) {

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/api_client.dart';
@@ -133,7 +134,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 padding: const EdgeInsets.only(top: 80, bottom: 40),
                 child: product.firstImage.isNotEmpty
                     ? Hero(
-                        tag: 'product_img_${product.id}',
+                        tag: 'product-image-${product.id}',
                         child: Image.network(
                           product.firstImage,
                           fit: BoxFit.contain,
@@ -345,7 +346,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [AppColors.accent, Color(0xFFEA580C)], // Orange gradient
+                          colors: [AppColors.accent, AppColors.accentDark], // Orange gradient
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -361,16 +362,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       child: ElevatedButton(
                         onPressed: product.inStock
                             ? () {
+                                HapticFeedback.mediumImpact();
                                 context.read<CartBloc>().add(
                                   CartItemAdded(productId: product.id),
                                 );
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Đã thêm "${product.name}" vào giỏ hàng!'),
+                                    content: Row(
+                                      children: [
+                                        const Icon(Icons.check_circle, color: Colors.white, size: 18),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: Text('Đã thêm "${product.name}" vào giỏ hàng!')),
+                                      ],
+                                    ),
                                     backgroundColor: AppColors.success,
                                     duration: const Duration(seconds: 2),
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                   ),
                                 );
                               }
