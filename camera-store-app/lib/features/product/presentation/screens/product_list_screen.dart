@@ -41,6 +41,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
     _debounce = Timer(const Duration(milliseconds: 500), () {
       context.read<ProductBloc>().add(ProductSearchChanged(query));
     });
+    setState(() {}); // Update to show/hide clear icon
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _onSearchChanged('');
+    FocusScope.of(context).unfocus();
   }
 
   void _showFilterSheet() {
@@ -87,30 +94,37 @@ class _ProductListScreenState extends State<ProductListScreen> {
       ),
       body: Column(
         children: [
-          // Search bar + Filter button
+          // Search bar + Filter button (Thumb zone friendly)
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
             color: AppColors.primary,
             child: Row(
+               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: TextField(
                       controller: _searchController,
                       onChanged: _onSearchChanged,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Tìm kiếm máy ảnh...',
-                        prefixIcon: Icon(Icons.search,
+                        prefixIcon: const Icon(Icons.search,
                             color: AppColors.textHint),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, color: AppColors.textSecondary),
+                                onPressed: _clearSearch,
+                              )
+                            : null,
                         border: InputBorder.none,
                         contentPadding:
-                            EdgeInsets.symmetric(vertical: 14),
+                            const EdgeInsets.symmetric(vertical: 16),
                         hintStyle:
-                            TextStyle(color: AppColors.textHint),
+                            const TextStyle(color: AppColors.textHint),
                       ),
                     ),
                   ),
@@ -120,19 +134,21 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   buildWhen: (prev, curr) =>
                       prev.hasActiveFilters != curr.hasActiveFilters,
                   builder: (context, state) {
-                    return GestureDetector(
-                      onTap: _showFilterSheet,
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: state.hasActiveFilters
-                              ? AppColors.accent
-                              : Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.tune,
-                          color: Colors.white,
+                    return Material(
+                      color: state.hasActiveFilters
+                          ? AppColors.accent
+                          : Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(16),
+                      child: InkWell(
+                        onTap: _showFilterSheet,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          child: const Icon(
+                            Icons.tune,
+                            color: Colors.white,
+                            size: 24,
+                          ),
                         ),
                       ),
                     );
@@ -175,15 +191,18 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               fontSize: 15,
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              context
-                                  .read<ProductBloc>()
-                                  .add(const ProductLoadRequested());
-                            },
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('Thử lại'),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: 200,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                context
+                                    .read<ProductBloc>()
+                                    .add(const ProductLoadRequested());
+                              },
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Thử lại'),
+                            ),
                           ),
                         ],
                       ),
@@ -207,14 +226,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 8),
                         const Text(
                           'Thử thay đổi từ khóa hoặc bộ lọc',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             color: AppColors.textHint,
                           ),
                         ),
@@ -234,9 +253,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.65,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.58, // Adjusted for taller card
+                      crossAxisSpacing: 16, // More breathing room
+                      mainAxisSpacing: 16, // More breathing room
                     ),
                     itemCount: state.products.length,
                     itemBuilder: (context, index) {
