@@ -77,8 +77,15 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     final statusCode = e.response?.statusCode;
-    final message =
-        e.response?.data?['message'] as String? ?? 'Đã có lỗi xảy ra';
+    final responseData = e.response?.data;
+    String message = responseData?['message'] as String? ?? 'Đã có lỗi xảy ra';
+
+    if (responseData?['errors'] != null && responseData?['errors'] is List) {
+      final errors = responseData?['errors'] as List;
+      if (errors.isNotEmpty && errors.first['msg'] != null) {
+        message = errors.first['msg'] as String;
+      }
+    }
 
     if (statusCode == 401) {
       return UnauthorizedFailure(message);
