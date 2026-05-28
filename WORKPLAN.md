@@ -1,17 +1,19 @@
 # Kế hoạch Phát triển Camera Store (9 Tuần)
 
-Dựa trên **Software Requirements Specification (SRS)**, dưới đây là kế hoạch phát triển (Workplan) chi tiết chia thành 9 tuần cho dự án Camera Store, bao gồm cả Frontend (Flutter) và Backend (Node.js/Express). 
+Dựa trên **Software Requirements Specification (SRS)**, dưới đây là kế hoạch phát triển (Workplan) chi tiết chia thành 9 tuần cho dự án Camera Store, bao gồm cả Frontend (Flutter) và Backend (Node.js/Express).
 
 > [!NOTE]
-> *Phase 1 (Thiết kế Database & API)* và *Khởi tạo cấu trúc Clean Architecture cho Flutter* đã được thực hiện xong một phần lớn. Kế hoạch này sẽ tập trung mạnh vào việc hoàn thiện Frontend và tích hợp.
+> _Phase 1 (Thiết kế Database & API)_ và _Khởi tạo cấu trúc Clean Architecture cho Flutter_ đã được thực hiện xong một phần lớn. Kế hoạch này sẽ tập trung mạnh vào việc hoàn thiện Frontend và tích hợp.
 
 ---
 
-## Tuần 1: Khởi tạo, Cấu trúc & Xác thực (Authentication) ✅
-*Tương ứng với Phase 1, Phase 2, Phase 3*
+## Tuần 1: Khởi tạo, Cấu trúc & Xác thực (Authentication) [x]
+
+_Tương ứng với Phase 1, Phase 2, Phase 3_
 
 **Mục tiêu:** Hoàn thiện nền tảng dự án và tính năng đăng nhập/đăng ký.
-- **Backend:** 
+
+- **Backend:**
   - Hoàn thiện API Register & Login (đã xong).
 - **Frontend (Flutter):**
   - Cấu hình Clean Architecture, Routing, Theme, HTTP Client (Dio).
@@ -21,10 +23,12 @@ Dựa trên **Software Requirements Specification (SRS)**, dưới đây là k�
 
 ---
 
-## Tuần 2: Khám phá Sản phẩm (Product Discovery) ✅
-*Tương ứng với Phase 4, Phase 5*
+## Tuần 2: Khám phá Sản phẩm (Product Discovery) [x]
+
+_Tương ứng với Phase 4, Phase 5_
 
 **Mục tiêu:** Cho phép người dùng duyệt, tìm kiếm và xem chi tiết sản phẩm.
+
 - **Frontend (Flutter):**
   - Triển khai **Product List Screen**: Gọi API lấy danh sách, làm giao diện lưới/danh sách.
   - Xây dựng công cụ Tìm kiếm và Bộ lọc (theo danh mục, thương hiệu, khoảng giá).
@@ -36,9 +40,11 @@ Dựa trên **Software Requirements Specification (SRS)**, dưới đây là k�
 ---
 
 ## Tuần 3: Giỏ hàng (Shopping Cart)
-*Tương ứng với Phase 6*
+
+_Tương ứng với Phase 6_
 
 **Mục tiêu:** Quản lý giỏ hàng của người dùng một cách liền mạch.
+
 - **Frontend (Flutter):**
   - Tích hợp tính năng thêm sản phẩm vào giỏ từ màn hình chi tiết.
   - Triển khai **Shopping Cart Screen**: Hiển thị danh sách sản phẩm.
@@ -49,9 +55,11 @@ Dựa trên **Software Requirements Specification (SRS)**, dưới đây là k�
 ---
 
 ## Tuần 4: Đặt hàng & Thanh toán (Checkout & Billing)
-*Tương ứng với Phase 7*
+
+_Tương ứng với Phase 7_
 
 **Mục tiêu:** Hoàn tất luồng mua sắm và tạo đơn hàng thành công.
+
 - **Frontend (Flutter):**
   - Triển khai **Checkout / Billing Screen**: Hiển thị tóm tắt đơn hàng.
   - Form điền thông tin giao hàng (bắt buộc nhập tên, sđt, địa chỉ).
@@ -62,9 +70,11 @@ Dựa trên **Software Requirements Specification (SRS)**, dưới đây là k�
 ---
 
 ## Tuần 5: Quản lý Đơn hàng (Order History)
-*Tương ứng với Phase 8*
+
+_Tương ứng với Phase 8_
 
 **Mục tiêu:** Người dùng theo dõi được lịch sử mua hàng của mình.
+
 - **Frontend (Flutter):**
   - Triển khai **Order History Screen**: Hiển thị danh sách đơn hàng.
   - Sắp xếp đơn hàng mới nhất lên trên cùng.
@@ -73,9 +83,11 @@ Dựa trên **Software Requirements Specification (SRS)**, dưới đây là k�
 ---
 
 ## Tuần 6: Hồ sơ Người dùng & Thông báo
-*Tương ứng với Phase 9, Phase 12*
+
+_Tương ứng với Phase 9, Phase 12_
 
 **Mục tiêu:** Quản lý tài khoản cá nhân và trung tâm thông báo.
+
 - **Frontend (Flutter):**
   - Triển khai **User Profile Screen**: Hiển thị thông tin cá nhân.
   - Cho phép cập nhật thông tin (không cho đổi email).
@@ -86,10 +98,12 @@ Dựa trên **Software Requirements Specification (SRS)**, dưới đây là k�
 ---
 
 ## Tuần 7: Hỗ trợ trực tuyến (Real-time Chat)
-*Tương ứng với Phase 11*
+
+_Tương ứng với Phase 11_
 
 **Mục tiêu:** Giao tiếp thời gian thực giữa Khách hàng và Nhân viên hỗ trợ.
-- **Backend:** 
+
+- **Backend:**
   - Đảm bảo Socket.io hoạt động ổn định, lưu trữ lịch sử chat.
 - **Frontend (Flutter):**
   - Cài đặt và cấu hình thư viện Socket.io client cho Flutter.
@@ -99,9 +113,11 @@ Dựa trên **Software Requirements Specification (SRS)**, dưới đây là k�
 ---
 
 ## Tuần 8: Bản đồ Cửa hàng & Cải thiện UI/UX (Polish)
-*Tương ứng với Phase 10*
+
+_Tương ứng với Phase 10_
 
 **Mục tiêu:** Tích hợp bản đồ và tinh chỉnh trải nghiệm người dùng.
+
 - **Frontend (Flutter):**
   - Tích hợp Google Maps SDK (hoặc Mapbox).
   - Triển khai **Map Store Location Screen**: Hiển thị marker vị trí cửa hàng, thông tin liên hệ.
@@ -112,10 +128,11 @@ Dựa trên **Software Requirements Specification (SRS)**, dưới đây là k�
 ## Tuần 9: Kiểm thử, Sửa lỗi & Chuẩn bị Release (UAT & Deployment)
 
 **Mục tiêu:** Đảm bảo hệ thống hoạt động ổn định, không có bug nghiêm trọng trước khi phát hành.
-- **Testing:** 
+
+- **Testing:**
   - Test toàn bộ luồng chức năng (End-to-End).
   - Kiểm tra các Business Rules (điều kiện validate, khóa tài khoản, trạng thái giỏ hàng, v.v.).
 - **Fixing:** Sửa các lỗi phát sinh (bugs) trên cả Backend và Frontend.
-- **Deployment:** 
+- **Deployment:**
   - Build file APK/AAB cho Android và IPA cho iOS.
   - Deploy Backend lên server staging/production.
