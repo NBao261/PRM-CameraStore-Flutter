@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../domain/entities/cart_item_entity.dart';
 
 class CartItemCard extends StatelessWidget {
@@ -56,19 +57,12 @@ class CartItemCard extends StatelessWidget {
               width: 96,
               height: 96,
               color: AppColors.surfaceDim,
-              child: product.firstImage.isNotEmpty
-                  ? Image.network(
-                      product.firstImage,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Center(
-                        child: Icon(Icons.camera_alt_outlined,
-                            color: AppColors.textHint, size: 28),
-                      ),
-                    )
-                  : const Center(
-                      child: Icon(Icons.camera_alt_outlined,
-                          color: AppColors.textHint, size: 28),
-                    ),
+              child: AppNetworkImage(
+                imageUrl: product.firstImage,
+                width: 96,
+                height: 96,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           const SizedBox(width: 14),

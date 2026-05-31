@@ -2,6 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
+import path from 'path';
 import { requestLogger } from './middlewares/logger';
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -17,8 +18,13 @@ import chatRoutes from './routes/chat.routes';
 
 const app = express();
 
+// ── Static files (product images) - before helmet ───
+app.use('/public', express.static(path.join(__dirname, '..', 'public')));
+
 // ── Security middleware ─────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 app.use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(',') || '*' }));
 app.use(compression());
 

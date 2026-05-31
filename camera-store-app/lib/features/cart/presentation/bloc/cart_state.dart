@@ -17,6 +17,14 @@ class CartState extends Equatable {
   int get totalItems => cart?.totalItems ?? 0;
   double get totalAmount => cart?.totalAmount ?? 0;
 
+  /// Get current quantity of a specific product in the cart
+  int getQuantityForProduct(String productId) {
+    if (cart == null) return 0;
+    final item = cart!.items.where((i) => i.product.id == productId);
+    if (item.isEmpty) return 0;
+    return item.first.quantity;
+  }
+
   CartState copyWith({
     CartStatus? status,
     CartEntity? cart,

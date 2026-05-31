@@ -1,4 +1,5 @@
 import '../../domain/entities/product_entity.dart';
+import '../../../../core/config/app_config.dart';
 
 class ProductModel {
   static ProductEntity fromJson(Map<String, dynamic> json) {
@@ -10,7 +11,7 @@ class ProductModel {
       categoryName: _extractPopulatedName(json['category']),
       categoryId: _extractPopulatedId(json['category']),
       images: (json['images'] as List<dynamic>?)
-              ?.map((e) => e.toString())
+              ?.map((e) => AppConfig.getImageUrl(e.toString()))
               .toList() ??
           [],
       price: (json['price'] ?? 0).toDouble(),

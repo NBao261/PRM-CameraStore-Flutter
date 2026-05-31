@@ -39,7 +39,7 @@ _Tương ứng với Phase 4, Phase 5_
 
 ---
 
-## Tuần 3: Giỏ hàng (Shopping Cart)
+## Tuần 3: Giỏ hàng (Shopping Cart) [x]
 
 _Tương ứng với Phase 6_
 

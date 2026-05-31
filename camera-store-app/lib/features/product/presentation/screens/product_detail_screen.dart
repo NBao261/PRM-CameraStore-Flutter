@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/widgets/cart_icon_badge.dart';
+import '../../../../core/widgets/fly_to_cart_animation.dart';
 import '../../../cart/presentation/bloc/cart_bloc.dart';
 import '../../../cart/presentation/bloc/cart_event.dart';
 import '../../data/datasources/product_remote_datasource.dart';
@@ -23,11 +25,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   ProductEntity? _product;
   bool _isLoading = true;
   String? _error;
+  int _currentImageIndex = 0;
+  final PageController _pageController = PageController();
+  final GlobalKey _cartIconKey = GlobalKey();
+  final GlobalKey _addToCartBtnKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _loadProduct();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProduct() async {
@@ -122,6 +134,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
               ),
             ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 4.0),
+                child: ClipOval(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      color: Colors.white.withOpacity(0.5),
+                      child: CartIconBadge(cartIconKey: _cartIconKey),
+                    ),
+                  ),
+                ),
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
@@ -131,18 +157,73 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     end: Alignment.bottomCenter,
                   ),
                 ),
-                padding: const EdgeInsets.only(top: 80, bottom: 40),
-                child: product.firstImage.isNotEmpty
-                    ? Hero(
-                        tag: 'product-image-${product.id}',
-                        child: Image.network(
-                          product.firstImage,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Center(
-                            child: Icon(Icons.camera_alt_outlined,
-                                size: 80, color: AppColors.textHint),
+                padding: const EdgeInsets.only(top: 80, bottom: 16),
+                child: product.images.isNotEmpty
+                    ? Column(
+                        children: [
+                          // ── Image PageView ──────────────────
+                          Expanded(
+                            child: PageView.builder(
+                              controller: _pageController,
+                              itemCount: product.images.length,
+                              onPageChanged: (index) {
+                                setState(() => _currentImageIndex = index);
+                              },
+                              itemBuilder: (context, index) {
+                                final isFirst = index == 0;
+                                final imageWidget = Image.network(
+                                  product.images[index],
+                                  fit: BoxFit.contain,
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return const Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.textHint,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (_, __, ___) => const Center(
+                                    child: Icon(Icons.camera_alt_outlined,
+                                        size: 80, color: AppColors.textHint),
+                                  ),
+                                );
+                                // Hero only on first image for smooth transition
+                                if (isFirst) {
+                                  return Hero(
+                                    tag: 'product-image-${product.id}',
+                                    child: imageWidget,
+                                  );
+                                }
+                                return imageWidget;
+                              },
+                            ),
                           ),
-                        ),
+                          // ── Dot Indicators ─────────────────
+                          if (product.images.length > 1)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  product.images.length,
+                                  (index) => AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                                    width: _currentImageIndex == index ? 24 : 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(4),
+                                      color: _currentImageIndex == index
+                                          ? AppColors.accent
+                                          : AppColors.textHint.withOpacity(0.3),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       )
                     : const Center(
                         child: Icon(Icons.camera_alt_outlined,
@@ -363,6 +444,35 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         onPressed: product.inStock
                             ? () {
                                 HapticFeedback.mediumImpact();
+                                // Stock validation
+                                final cartState = context.read<CartBloc>().state;
+                                final currentQty = cartState.getQuantityForProduct(product.id);
+                                if (currentQty >= product.stock) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Row(
+                                        children: [
+                                          const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 18),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              'Chỉ còn ${product.stock} sản phẩm trong kho!',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      backgroundColor: AppColors.error,
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                // Fly-to-cart animation
+                                FlyToCartAnimation.trigger(
+                                  context: context,
+                                  startGlobalKey: _addToCartBtnKey,
+                                  targetGlobalKey: _cartIconKey,
+                                );
                                 context.read<CartBloc>().add(
                                   CartItemAdded(productId: product.id),
                                 );
@@ -390,7 +500,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           elevation: 0,
                         ),
-                        child: const Row(
+                        child: Row(
+                          key: _addToCartBtnKey,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.shopping_cart_outlined, size: 20, color: Colors.white),
