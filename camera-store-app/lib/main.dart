@@ -17,6 +17,9 @@ import 'features/cart/data/datasources/cart_remote_datasource.dart';
 import 'features/cart/data/repositories/cart_repository_impl.dart';
 import 'features/cart/presentation/bloc/cart_bloc.dart';
 import 'features/cart/presentation/bloc/cart_event.dart';
+import 'features/order/data/datasources/order_remote_datasource.dart';
+import 'features/order/data/repositories/order_repository_impl.dart';
+import 'features/order/presentation/bloc/order_bloc.dart';
 import 'features/product/presentation/screens/product_list_screen.dart';
 
 void main() {
@@ -39,6 +42,9 @@ class CameraStoreApp extends StatelessWidget {
     final cartRemoteDataSource = CartRemoteDataSourceImpl(apiClient);
     final cartRepository = CartRepositoryImpl(cartRemoteDataSource);
 
+    final orderRemoteDataSource = OrderRemoteDataSource(apiClient);
+    final orderRepository = OrderRepositoryImpl(orderRemoteDataSource);
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -49,6 +55,9 @@ class CameraStoreApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => CartBloc(cartRepository: cartRepository),
+        ),
+        BlocProvider(
+          create: (_) => OrderBloc(orderRepository: orderRepository),
         ),
       ],
       child: MaterialApp(

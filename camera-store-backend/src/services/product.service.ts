@@ -7,6 +7,7 @@ export class ProductService {
     brand?: string;
     minPrice?: string;
     maxPrice?: string;
+    sort?: string;
   }) {
     const filter: any = { isActive: true };
 
@@ -19,10 +20,16 @@ export class ProductService {
       if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
     }
 
+    let sortOption: any = { createdAt: -1 };
+    if (query.sort === 'price_asc') sortOption = { price: 1 };
+    else if (query.sort === 'price_desc') sortOption = { price: -1 };
+    else if (query.sort === 'name_asc') sortOption = { name: 1 };
+    else if (query.sort === 'name_desc') sortOption = { name: -1 };
+
     return Product.find(filter)
       .populate('brand', 'name slug')
       .populate('category', 'name slug')
-      .sort({ createdAt: -1 });
+      .sort(sortOption);
   }
 
   async getProductById(id: string) {

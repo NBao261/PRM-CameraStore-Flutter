@@ -137,15 +137,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 4.0),
-                child: ClipOval(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      color: Colors.white.withOpacity(0.5),
-                      child: CartIconBadge(cartIconKey: _cartIconKey),
-                    ),
-                  ),
-                ),
+                child: CartIconBadge(cartIconKey: _cartIconKey),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(

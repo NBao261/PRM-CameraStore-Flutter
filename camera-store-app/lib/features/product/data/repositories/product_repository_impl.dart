@@ -16,6 +16,7 @@ class ProductRepositoryImpl implements ProductRepository {
     String? brand,
     double? minPrice,
     double? maxPrice,
+    String? sort,
   }) async {
     try {
       return await _remoteDataSource.getProducts(
@@ -24,6 +25,7 @@ class ProductRepositoryImpl implements ProductRepository {
         brand: brand,
         minPrice: minPrice,
         maxPrice: maxPrice,
+        sort: sort,
       );
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -43,6 +45,15 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<List<CategoryEntity>> getCategories() async {
     try {
       return await _remoteDataSource.getCategories();
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  @override
+  Future<List<BrandEntity>> getBrands() async {
+    try {
+      return await _remoteDataSource.getBrands();
     } on DioException catch (e) {
       throw _handleDioError(e);
     }

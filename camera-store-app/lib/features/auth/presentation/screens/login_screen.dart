@@ -77,13 +77,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Chào mừng bạn trở lại!',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                  ),
+                  // Text(
+                  //   'Chào mừng bạn trở lại!',
+                  //   textAlign: TextAlign.center,
+                  //   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  //         color: AppColors.textSecondary,
+                  //       ),
+                  // ),
                   const SizedBox(height: 48),
 
                   // Email field
@@ -99,7 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (value == null || value.trim().isEmpty) {
                         return AppStrings.fieldRequired;
                       }
-                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      final emailRegex =
+                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                       if (!emailRegex.hasMatch(value.trim())) {
                         return AppStrings.invalidEmail;
                       }

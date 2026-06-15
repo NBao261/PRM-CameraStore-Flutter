@@ -57,14 +57,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state.status == AuthStatus.registered) {
+          if (state.status == AuthStatus.otpSent) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text(AppStrings.registerSuccess),
+                content: Text('Mã xác thực đã được gửi đến email của bạn'),
                 backgroundColor: AppColors.success,
               ),
             );
-            Navigator.pop(context); // Go back to Login
+            Navigator.pushNamed(
+              context,
+              '/verify-otp',
+              arguments: _emailController.text.trim(),
+            );
           }
           if (state.status == AuthStatus.error && state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(

@@ -104,3 +104,18 @@ class CategoryEntity extends Equatable {
   @override
   List<Object?> get props => [id, name];
 }
+
+class BrandEntity extends Equatable {
+  final String id;
+  final String name;
+  final String? slug;
+
+  const BrandEntity({
+    required this.id,
+    required this.name,
+    this.slug,
+  });
+
+  @override
+  List<Object?> get props => [id, name];
+}

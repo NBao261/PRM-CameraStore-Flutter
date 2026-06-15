@@ -65,12 +65,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
         selectedCategory: state.selectedCategory,
         minPrice: state.minPrice,
         maxPrice: state.maxPrice,
-        onApply: ({category, minPrice, maxPrice}) {
+        sortOption: state.sortOption,
+        onApply: ({category, minPrice, maxPrice, sortOption}) {
           context.read<ProductBloc>().add(
                 ProductFilterApplied(
                   category: category,
                   minPrice: minPrice,
                   maxPrice: maxPrice,
+                  sort: sortOption,
                 ),
               );
         },
@@ -93,7 +95,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 AppStrings.appName,
                 style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1),
               ),
-              backgroundColor: AppColors.primary.withOpacity(0.85),
+              backgroundColor: AppColors.primary.withValues(alpha: 0.85),
               foregroundColor: Colors.white,
               elevation: 0,
               actions: [
@@ -113,7 +115,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
         children: [
           // Header with Search bar + Filter button
           Container(
-            padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 70, 20, 24),
+            padding: EdgeInsets.fromLTRB(
+                20, MediaQuery.of(context).padding.top + 70, 20, 24),
             decoration: const BoxDecoration(
               color: AppColors.primary,
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
@@ -125,97 +128,166 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 )
               ],
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(100), // Pill shape
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: _onSearchChanged,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                      decoration: InputDecoration(
-                        hintText: 'Tìm kiếm máy ảnh...',
-                        prefixIcon: const Padding(
-                          padding: EdgeInsets.only(left: 12),
-                          child: Icon(Icons.search, color: AppColors.textHint),
-                        ),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: IconButton(
-                                  icon: const Icon(Icons.cancel, color: AppColors.textSecondary),
-                                  onPressed: _clearSearch,
-                                ),
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                        hintStyle: const TextStyle(color: AppColors.textHint),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                BlocBuilder<ProductBloc, ProductState>(
-                  buildWhen: (prev, curr) =>
-                      prev.hasActiveFilters != curr.hasActiveFilters,
-                  builder: (context, state) {
-                     return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      decoration: BoxDecoration(
-                        gradient: state.hasActiveFilters
-                            ? const LinearGradient(
-                                colors: [Color(0xFFF97316), Color(0xFFEA580C)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : null,
-                        color: state.hasActiveFilters ? null : Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(100),
-                        boxShadow: state.hasActiveFilters
-                            ? [
-                                BoxShadow(
-                                  color: AppColors.accent.withOpacity(0.4),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                )
-                              ]
-                            : [],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: _showFilterSheet,
-                          borderRadius: BorderRadius.circular(100),
+            child: BlocBuilder<ProductBloc, ProductState>(
+              builder: (context, state) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
                           child: Container(
-                            padding: const EdgeInsets.all(16),
-                            child: const Icon(
-                              Icons.tune,
+                            decoration: BoxDecoration(
                               color: Colors.white,
-                              size: 24,
+                              borderRadius:
+                                  BorderRadius.circular(100), // Pill shape
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: _onSearchChanged,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w500),
+                              decoration: InputDecoration(
+                                hintText: 'Tìm kiếm máy ảnh...',
+                                prefixIcon: const Padding(
+                                  padding: EdgeInsets.only(left: 12),
+                                  child: Icon(Icons.search,
+                                      color: AppColors.textHint),
+                                ),
+                                suffixIcon: _searchController.text.isNotEmpty
+                                    ? Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 8),
+                                        child: IconButton(
+                                          icon: const Icon(Icons.cancel,
+                                              color: AppColors.textSecondary),
+                                          onPressed: _clearSearch,
+                                        ),
+                                      )
+                                    : null,
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 20),
+                                hintStyle:
+                                    const TextStyle(color: AppColors.textHint),
+                              ),
                             ),
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        BlocBuilder<ProductBloc, ProductState>(
+                          buildWhen: (prev, curr) =>
+                              prev.hasActiveFilters != curr.hasActiveFilters,
+                          builder: (context, state) {
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              decoration: BoxDecoration(
+                                gradient: state.hasActiveFilters
+                                    ? const LinearGradient(
+                                        colors: [
+                                          Color(0xFFF97316),
+                                          Color(0xFFEA580C)
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      )
+                                    : null,
+                                color: state.hasActiveFilters
+                                    ? null
+                                    : Colors.white.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(100),
+                                boxShadow: state.hasActiveFilters
+                                    ? [
+                                        BoxShadow(
+                                          color: AppColors.accent
+                                              .withValues(alpha: 0.4),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
+                                        )
+                                      ]
+                                    : [],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: _showFilterSheet,
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    child: const Icon(
+                                      Icons.tune,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    if (state.brands.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 38,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: state.brands.length + 1,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 10),
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return _buildBrandChip(
+                                label: 'Tất cả',
+                                isSelected: state.selectedBrand == null,
+                                onTap: () {
+                                  context.read<ProductBloc>().add(
+                                        ProductFilterApplied(
+                                          category: state.selectedCategory,
+                                          brand: null,
+                                          minPrice: state.minPrice,
+                                          maxPrice: state.maxPrice,
+                                          sort: state.sortOption,
+                                        ),
+                                      );
+                                },
+                              );
+                            }
+                            final brand = state.brands[index - 1];
+                            return _buildBrandChip(
+                              label: brand.name,
+                              isSelected: state.selectedBrand == brand.id,
+                              onTap: () {
+                                context.read<ProductBloc>().add(
+                                      ProductFilterApplied(
+                                        category: state.selectedCategory,
+                                        brand: brand.id,
+                                        minPrice: state.minPrice,
+                                        maxPrice: state.maxPrice,
+                                        sort: state.sortOption,
+                                      ),
+                                    );
+                              },
+                            );
+                          },
+                        ),
                       ),
-                    );
-                  },
-                ),
-              ],
+                    ],
+                  ],
+                );
+              },
             ),
           ),
 
@@ -275,7 +347,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         Icon(
                           Icons.camera_alt_outlined,
                           size: 80,
-                          color: AppColors.textHint.withOpacity(0.5),
+                          color: AppColors.textHint.withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 16),
                         const Text(
@@ -306,13 +378,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         .add(const ProductLoadRequested());
                   },
                   child: GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 24),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.55,
-                      crossAxisSpacing: 16, 
-                      mainAxisSpacing: 20, 
+                      childAspectRatio: 0.53,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 20,
                     ),
                     itemCount: state.products.length,
                     itemBuilder: (context, index) {
@@ -335,6 +408,37 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBrandChip(
+      {required String label,
+      required bool isSelected,
+      required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        decoration: BoxDecoration(
+          color:
+              isSelected ? Colors.white : Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Colors.white : Colors.transparent,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              color: isSelected ? AppColors.primary : Colors.white,
+            ),
+          ),
+        ),
       ),
     );
   }

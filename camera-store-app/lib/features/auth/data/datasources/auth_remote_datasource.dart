@@ -26,6 +26,19 @@ class AuthRemoteDataSource {
     );
   }
 
+  Future<void> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    await _apiClient.dio.post(
+      ApiEndpoints.verifyOtp,
+      data: {
+        'email': email,
+        'otp': otp,
+      },
+    );
+  }
+
   /// Returns { token, user } from API
   Future<Map<String, dynamic>> login({
     required String email,

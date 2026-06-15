@@ -4,10 +4,21 @@ import { ApiResponse } from '../utils/response';
 import { IAuthRequest } from '../types';
 
 // POST /api/auth/register
-export const register = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const data = await authService.register(req.body);
-    ApiResponse.created(_res, data, 'Đăng ký thành công');
+    res.status(200).json({ success: true, message: data.message });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/auth/verify-otp
+export const verifyOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, otp } = req.body;
+    const data = await authService.verifyOtp(email, otp);
+    res.status(201).json({ success: true, message: 'Đăng ký thành công', data });
   } catch (error) {
     next(error);
   }

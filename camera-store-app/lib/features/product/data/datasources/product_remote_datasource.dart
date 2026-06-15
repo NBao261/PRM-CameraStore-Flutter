@@ -14,6 +14,7 @@ class ProductRemoteDataSource {
     String? brand,
     double? minPrice,
     double? maxPrice,
+    String? sort,
   }) async {
     final queryParams = <String, dynamic>{};
     if (search != null && search.isNotEmpty) queryParams['search'] = search;
@@ -21,6 +22,7 @@ class ProductRemoteDataSource {
     if (brand != null && brand.isNotEmpty) queryParams['brand'] = brand;
     if (minPrice != null) queryParams['minPrice'] = minPrice.toString();
     if (maxPrice != null) queryParams['maxPrice'] = maxPrice.toString();
+    if (sort != null && sort.isNotEmpty) queryParams['sort'] = sort;
 
     final response = await _apiClient.dio.get(
       ApiEndpoints.products,
@@ -41,5 +43,11 @@ class ProductRemoteDataSource {
     final response = await _apiClient.dio.get(ApiEndpoints.categories);
     final List<dynamic> data = response.data['data'] ?? response.data;
     return data.map((json) => CategoryModel.fromJson(json)).toList();
+  }
+
+  Future<List<BrandEntity>> getBrands() async {
+    final response = await _apiClient.dio.get('${ApiEndpoints.categories}/brands');
+    final List<dynamic> data = response.data['data'] ?? response.data;
+    return data.map((json) => BrandModel.fromJson(json)).toList();
   }
 }

@@ -8,6 +8,11 @@ abstract class AuthRepository {
     required String password,
   });
 
+  Future<void> verifyOtp({
+    required String email,
+    required String otp,
+  });
+
   Future<UserEntity> login({
     required String email,
     required String password,

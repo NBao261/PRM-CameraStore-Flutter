@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/verify_otp_screen.dart';
 import '../../features/product/presentation/screens/product_list_screen.dart';
 import '../../features/product/presentation/screens/product_detail_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
+import '../../features/order/presentation/screens/checkout_screen.dart';
+import '../../features/order/presentation/screens/order_success_screen.dart';
+import '../../features/order/domain/entities/order_entity.dart';
 
 class AppRouter {
   static const String login = '/login';
   static const String register = '/register';
+  static const String verifyOtp = '/verify-otp';
   static const String home = '/home';
   static const String productDetail = '/product-detail';
   static const String cart = '/cart';
+  static const String checkout = '/checkout';
+  static const String orderSuccess = '/order-success';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -18,6 +25,9 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case register:
         return MaterialPageRoute(builder: (_) => const RegisterScreen());
+      case verifyOtp:
+        final email = settings.arguments as String;
+        return MaterialPageRoute(builder: (_) => VerifyOtpScreen(email: email));
       case home:
         return MaterialPageRoute(builder: (_) => const ProductListScreen());
       case productDetail:
@@ -27,6 +37,13 @@ class AppRouter {
         );
       case cart:
         return MaterialPageRoute(builder: (_) => const CartScreen());
+      case checkout:
+        return MaterialPageRoute(builder: (_) => const CheckoutScreen());
+      case orderSuccess:
+        final order = settings.arguments as OrderEntity;
+        return MaterialPageRoute(
+          builder: (_) => OrderSuccessScreen(order: order),
+        );
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
