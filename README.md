@@ -20,41 +20,43 @@
 
 ## 🎯 Tổng quan
 
-| Tính năng | Mô tả |
-|-----------|-------|
-| 🔐 Xác thực | Đăng ký, Đăng nhập, JWT token |
-| 🛍️ Sản phẩm | Danh sách, Tìm kiếm, Lọc theo danh mục, Chi tiết sản phẩm |
-| 🛒 Giỏ hàng | Thêm/Xóa/Cập nhật số lượng, Validate tồn kho |
-| 📦 Đặt hàng | Quy trình đặt hàng, Lịch sử đơn hàng |
-| 👤 Hồ sơ | Quản lý thông tin cá nhân |
-| 💬 Chat | Nhắn tin real-time (Socket.IO) |
-| 🔔 Thông báo | Push notification |
+| Tính năng    | Mô tả                                                     |
+| ------------ | --------------------------------------------------------- |
+| 🔐 Xác thực  | Đăng ký, Đăng nhập, JWT token                             |
+| 🛍️ Sản phẩm  | Danh sách, Tìm kiếm, Lọc theo danh mục, Chi tiết sản phẩm |
+| 🛒 Giỏ hàng  | Thêm/Xóa/Cập nhật số lượng, Validate tồn kho              |
+| 📦 Đặt hàng  | Quy trình đặt hàng, Lịch sử đơn hàng                      |
+| 👤 Hồ sơ     | Quản lý thông tin cá nhân                                 |
+| 💬 Chat      | Nhắn tin real-time (Socket.IO)                            |
+| 🔔 Thông báo | Push notification                                         |
 
 ---
 
 ## 🛠 Công nghệ sử dụng
 
 ### Frontend (Flutter)
-| Thư viện | Phiên bản | Mục đích |
-|----------|-----------|----------|
-| `flutter_bloc` | ^8.1.6 | State Management (BLoC pattern) |
-| `dio` | ^5.4.3 | HTTP Client |
-| `equatable` | ^2.0.5 | Value equality cho states/events |
-| `go_router` | ^14.2.0 | Routing & Navigation |
-| `flutter_secure_storage` | ^9.2.2 | Lưu JWT token an toàn |
-| `google_fonts` | ^6.2.1 | Typography (Inter, Roboto) |
+
+| Thư viện                 | Phiên bản | Mục đích                         |
+| ------------------------ | --------- | -------------------------------- |
+| `flutter_bloc`           | ^8.1.6    | State Management (BLoC pattern)  |
+| `dio`                    | ^5.4.3    | HTTP Client                      |
+| `equatable`              | ^2.0.5    | Value equality cho states/events |
+| `go_router`              | ^14.2.0   | Routing & Navigation             |
+| `flutter_secure_storage` | ^9.2.2    | Lưu JWT token an toàn            |
+| `google_fonts`           | ^6.2.1    | Typography (Inter, Roboto)       |
 
 ### Backend (Node.js)
-| Thư viện | Phiên bản | Mục đích |
-|----------|-----------|----------|
-| `express` | ^4.21.0 | Web Framework |
-| `mongoose` | ^8.7.0 | MongoDB ODM |
-| `jsonwebtoken` | ^9.0.2 | JWT Authentication |
-| `bcryptjs` | ^2.4.3 | Mã hóa mật khẩu |
-| `express-validator` | ^7.2.0 | Validate request |
-| `socket.io` | ^4.8.0 | Real-time communication |
-| `helmet` | ^8.0.0 | Security headers |
-| `multer` | ^1.4.5 | Upload file |
+
+| Thư viện            | Phiên bản | Mục đích                |
+| ------------------- | --------- | ----------------------- |
+| `express`           | ^4.21.0   | Web Framework           |
+| `mongoose`          | ^8.7.0    | MongoDB ODM             |
+| `jsonwebtoken`      | ^9.0.2    | JWT Authentication      |
+| `bcryptjs`          | ^2.4.3    | Mã hóa mật khẩu         |
+| `express-validator` | ^7.2.0    | Validate request        |
+| `socket.io`         | ^4.8.0    | Real-time communication |
+| `helmet`            | ^8.0.0    | Security headers        |
+| `multer`            | ^1.4.5    | Upload file             |
 
 ---
 
@@ -103,6 +105,7 @@ PRM/
 ```
 
 Mỗi feature module tuân theo **Clean Architecture**:
+
 ```
 feature/
 ├── data/
@@ -122,15 +125,15 @@ feature/
 
 ## 💻 Yêu cầu hệ thống
 
-| Yêu cầu | Phiên bản tối thiểu |
-|----------|---------------------|
-| **Flutter SDK** | >= 3.0.0 |
-| **Dart SDK** | >= 3.0.0 |
-| **Node.js** | >= 18.0.0 |
-| **npm** | >= 9.0.0 |
-| **MongoDB** | >= 6.0 |
+| Yêu cầu            | Phiên bản tối thiểu                |
+| ------------------ | ---------------------------------- |
+| **Flutter SDK**    | >= 3.0.0                           |
+| **Dart SDK**       | >= 3.0.0                           |
+| **Node.js**        | >= 18.0.0                          |
+| **npm**            | >= 9.0.0                           |
+| **MongoDB**        | >= 6.0                             |
 | **Android Studio** | Bản mới nhất (có Android Emulator) |
-| **Git** | Bản mới nhất |
+| **Git**            | Bản mới nhất                       |
 
 ---
 
@@ -172,6 +175,7 @@ npm run seed
 ```
 
 Lệnh này sẽ tạo sẵn:
+
 - Các danh mục sản phẩm (DSLR, Mirrorless, Ống kính, ...)
 - Các thương hiệu (Canon, Sony, Fujifilm, ...)
 - Sản phẩm mẫu với ảnh
@@ -199,6 +203,7 @@ Server sẽ chạy tại: `http://localhost:5000`
 Tải Flutter SDK từ [flutter.dev/docs/get-started/install](https://docs.flutter.dev/get-started/install)
 
 Kiểm tra cài đặt:
+
 ```bash
 flutter doctor
 ```
@@ -226,11 +231,11 @@ class AppConfig {
 }
 ```
 
-| Môi trường | Giá trị `baseUrl` |
-|------------|-------------------|
-| Android Emulator | `http://10.0.2.2:5000` |
+| Môi trường                | Giá trị `baseUrl`           |
+| ------------------------- | --------------------------- |
+| Android Emulator          | `http://10.0.2.2:5000`      |
 | Thiết bị thật (cùng WiFi) | `http://<IP-máy-tính>:5000` |
-| iOS Simulator | `http://localhost:5000` |
+| iOS Simulator             | `http://localhost:5000`     |
 
 > **Lưu ý**: `10.0.2.2` là địa chỉ đặc biệt của Android Emulator, trỏ về `localhost` của máy host.
 
@@ -252,13 +257,13 @@ flutter run --release
 
 #### Các phím tắt khi đang chạy `flutter run`:
 
-| Phím | Chức năng |
-|------|-----------|
-| `r` | **Hot Reload** - Cập nhật UI nhanh (giữ state) |
-| `R` | **Hot Restart** - Khởi động lại app (reset state) |
-| `q` | Thoát |
-| `p` | Bật/tắt lưới debug |
-| `o` | Chuyển đổi giữa Android/iOS platform |
+| Phím | Chức năng                                         |
+| ---- | ------------------------------------------------- |
+| `r`  | **Hot Reload** - Cập nhật UI nhanh (giữ state)    |
+| `R`  | **Hot Restart** - Khởi động lại app (reset state) |
+| `q`  | Thoát                                             |
+| `p`  | Bật/tắt lưới debug                                |
+| `o`  | Chuyển đổi giữa Android/iOS platform              |
 
 ---
 
@@ -266,20 +271,20 @@ flutter run --release
 
 ### Backend `.env`
 
-| Biến | Mặc định | Mô tả |
-|------|----------|-------|
-| `PORT` | `5000` | Cổng chạy server |
-| `MONGODB_URI` | `mongodb://localhost:27017/camera_store` | Connection string MongoDB |
-| `JWT_SECRET` | `default_secret` | Khóa bí mật cho JWT |
-| `JWT_EXPIRES_IN` | `7d` | Thời hạn token (7 ngày) |
+| Biến             | Mặc định                                 | Mô tả                     |
+| ---------------- | ---------------------------------------- | ------------------------- |
+| `PORT`           | `5000`                                   | Cổng chạy server          |
+| `MONGODB_URI`    | `mongodb://localhost:27017/camera_store` | Connection string MongoDB |
+| `JWT_SECRET`     | `default_secret`                         | Khóa bí mật cho JWT       |
+| `JWT_EXPIRES_IN` | `7d`                                     | Thời hạn token (7 ngày)   |
 
 ### Flutter `app_config.dart`
 
-| Hằng số | Mô tả |
-|---------|-------|
-| `baseUrl` | URL gốc của backend API |
+| Hằng số      | Mô tả                   |
+| ------------ | ----------------------- |
+| `baseUrl`    | URL gốc của backend API |
 | `apiBaseUrl` | URL API (`baseUrl/api`) |
-| `appName` | Tên ứng dụng hiển thị |
+| `appName`    | Tên ứng dụng hiển thị   |
 
 ---
 
@@ -363,9 +368,9 @@ git push origin <branch_name>
 
 Sau khi chạy `npm run seed`, các tài khoản sau sẽ được tạo sẵn:
 
-| Vai trò | Email | Mật khẩu |
-|---------|-------|----------|
-| Admin | `admin@camera-store.com` | `Admin@123` |
+| Vai trò | Email                    | Mật khẩu    |
+| ------- | ------------------------ | ----------- |
+| Admin   | `admin@camera-store.com` | `Admin@123` |
 
 Bạn cũng có thể **đăng ký tài khoản mới** trực tiếp trên ứng dụng.
 

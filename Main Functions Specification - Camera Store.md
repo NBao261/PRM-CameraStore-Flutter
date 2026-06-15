@@ -15,41 +15,41 @@ Nhóm cần thiết kế cấu trúc dữ liệu và REST API để phục vụ 
 
 ### Các dữ liệu chính cần có
 
-| Nhóm dữ liệu | Mô tả |
-|---|---|
-| User | Lưu thông tin tài khoản: họ tên, email, số điện thoại, địa chỉ giao hàng, mật khẩu đã mã hóa (bcrypt), avatar, avatar |
+| Nhóm dữ liệu     | Mô tả                                                                                                                                                                                                                                |
+| ------------------| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| User             | Lưu thông tin tài khoản: họ tên, email, số điện thoại, địa chỉ giao hàng, mật khẩu đã mã hóa (bcrypt), avatar, avatar                                                                                                                |
 | Product (Camera) | Lưu thông tin camera: tên sản phẩm, thương hiệu, hình ảnh (nhiều ảnh), giá bán, giá khuyến mãi, mô tả, thông số kỹ thuật (megapixel, loại cảm biến, ISO, loại ống kính, quay video, kết nối), tồn kho, trạng thái còn hàng, danh mục |
-| Category / Brand | Lưu danh mục sản phẩm (DSLR, Mirrorless, Compact, Action Camera, Instant Camera) hoặc thương hiệu (Canon, Nikon, Sony, Fujifilm, GoPro, Panasonic) |
-| Cart | Lưu các sản phẩm khách hàng đã thêm vào giỏ hàng, liên kết với user_id |
-| Order | Lưu thông tin đơn hàng: khách hàng, danh sách sản phẩm, tổng tiền, địa chỉ giao hàng, trạng thái đơn hàng (pending, confirmed, shipping, delivered, cancelled) |
-| Order Item | Lưu chi tiết từng sản phẩm trong đơn hàng: product_id, số lượng, giá tại thời điểm đặt |
-| Notification | Lưu thông báo khuyến mãi, cập nhật đơn hàng, thông báo hệ thống, thông báo từ cửa hàng |
-| Store Location | Lưu thông tin vị trí cửa hàng để hiển thị trên bản đồ |
-| Chat Message | Lưu nội dung tin nhắn giữa khách hàng và nhân viên hỗ trợ |
+| Category / Brand | Lưu danh mục sản phẩm (DSLR, Mirrorless, Compact, Action Camera, Instant Camera) hoặc thương hiệu (Canon, Nikon, Sony, Fujifilm, GoPro, Panasonic)                                                                                   |
+| Cart             | Lưu các sản phẩm khách hàng đã thêm vào giỏ hàng, liên kết với user_id                                                                                                                                                               |
+| Order            | Lưu thông tin đơn hàng: khách hàng, danh sách sản phẩm, tổng tiền, địa chỉ giao hàng, trạng thái đơn hàng (pending, confirmed, shipping, delivered, cancelled)                                                                       |
+| Order Item       | Lưu chi tiết từng sản phẩm trong đơn hàng: product_id, số lượng, giá tại thời điểm đặt                                                                                                                                               |
+| Notification     | Lưu thông báo khuyến mãi, cập nhật đơn hàng, thông báo hệ thống, thông báo từ cửa hàng                                                                                                                                               |
+| Store Location   | Lưu thông tin vị trí cửa hàng để hiển thị trên bản đồ                                                                                                                                                                                |
+| Chat Message     | Lưu nội dung tin nhắn giữa khách hàng và nhân viên hỗ trợ                                                                                                                                                                            |
 
 ### REST API Endpoints chính
 
-| Method | Endpoint | Mô tả | Role |
-|---|---|---|---|
-| POST | `/api/auth/register` | Đăng ký tài khoản | Public |
-| POST | `/api/auth/login` | Đăng nhập | Public |
-| GET | `/api/auth/profile` | Lấy thông tin cá nhân | User |
-| PUT | `/api/auth/profile` | Cập nhật thông tin cá nhân | User |
-| GET | `/api/products` | Lấy danh sách sản phẩm | Public |
-| GET | `/api/products/:id` | Lấy chi tiết sản phẩm | Public |
-| GET | `/api/categories` | Lấy danh sách danh mục | Public |
-| GET | `/api/cart` | Lấy giỏ hàng | User |
-| POST | `/api/cart` | Thêm sản phẩm vào giỏ | User |
-| PUT | `/api/cart/:id` | Cập nhật số lượng | User |
-| DELETE | `/api/cart/:id` | Xóa sản phẩm khỏi giỏ | User |
-| POST | `/api/orders` | Tạo đơn hàng | User |
-| GET | `/api/orders` | Lấy danh sách đơn hàng | User |
-| GET | `/api/orders/:id` | Chi tiết đơn hàng | User |
-| GET | `/api/notifications` | Lấy danh sách thông báo | User |
-| PUT | `/api/notifications/:id/read` | Đánh dấu đã đọc | User |
-| GET | `/api/stores` | Lấy danh sách cửa hàng | Public |
-| POST | `/api/chat` | Gửi tin nhắn cho nhân viên hỗ trợ | User |
-| GET | `/api/chat/history` | Lấy lịch sử chat | User |
+| Method | Endpoint                      | Mô tả                             | Role   |
+| --------| -------------------------------| -----------------------------------| --------|
+| POST   | `/api/auth/register`          | Đăng ký tài khoản                 | Public |
+| POST   | `/api/auth/login`             | Đăng nhập                         | Public |
+| GET    | `/api/auth/profile`           | Lấy thông tin cá nhân             | User   |
+| PUT    | `/api/auth/profile`           | Cập nhật thông tin cá nhân        | User   |
+| GET    | `/api/products`               | Lấy danh sách sản phẩm            | Public |
+| GET    | `/api/products/:id`           | Lấy chi tiết sản phẩm             | Public |
+| GET    | `/api/categories`             | Lấy danh sách danh mục            | Public |
+| GET    | `/api/cart`                   | Lấy giỏ hàng                      | User   |
+| POST   | `/api/cart`                   | Thêm sản phẩm vào giỏ             | User   |
+| PUT    | `/api/cart/:id`               | Cập nhật số lượng                 | User   |
+| DELETE | `/api/cart/:id`               | Xóa sản phẩm khỏi giỏ             | User   |
+| POST   | `/api/orders`                 | Tạo đơn hàng                      | User   |
+| GET    | `/api/orders`                 | Lấy danh sách đơn hàng            | User   |
+| GET    | `/api/orders/:id`             | Chi tiết đơn hàng                 | User   |
+| GET    | `/api/notifications`          | Lấy danh sách thông báo           | User   |
+| PUT    | `/api/notifications/:id/read` | Đánh dấu đã đọc                   | User   |
+| GET    | `/api/stores`                 | Lấy danh sách cửa hàng            | Public |
+| POST   | `/api/chat`                   | Gửi tin nhắn cho nhân viên hỗ trợ | User   |
+| GET    | `/api/chat/history`           | Lấy lịch sử chat                  | User   |
 
 ### Nhóm cần trình bày rõ
 
