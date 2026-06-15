@@ -2,9 +2,13 @@ import '../../domain/entities/order_entity.dart';
 
 class OrderModel {
   static OrderEntity fromJson(Map<String, dynamic> json) {
+    // If the backend returns { order, payUrl }, extract order details
+    final orderData = json.containsKey('order') ? json['order'] : json;
+    final payUrl = json.containsKey('payUrl') ? json['payUrl'] as String? : null;
+
     return OrderEntity(
-      id: json['_id'] as String,
-      items: (json['items'] as List<dynamic>)
+      id: orderData['_id'] as String,
+      items: (orderData['items'] as List<dynamic>)
           .map((item) => OrderItemEntity(
                 productId: item['product'] is Map
                     ? item['product']['_id'] as String
@@ -15,17 +19,18 @@ class OrderModel {
               ))
           .toList(),
       shippingInfo: ShippingInfo(
-        fullName: json['shippingInfo']['fullName'] as String,
-        phone: json['shippingInfo']['phone'] as String,
-        address: json['shippingInfo']['address'] as String,
-        note: json['shippingInfo']['note'] as String? ?? '',
+        fullName: orderData['shippingInfo']['fullName'] as String,
+        phone: orderData['shippingInfo']['phone'] as String,
+        address: orderData['shippingInfo']['address'] as String,
+        note: orderData['shippingInfo']['note'] as String? ?? '',
       ),
-      paymentMethod: json['paymentMethod'] as String,
-      subtotal: (json['subtotal'] as num).toDouble(),
-      shippingFee: (json['shippingFee'] as num).toDouble(),
-      total: (json['total'] as num).toDouble(),
-      status: _parseStatus(json['status'] as String),
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      paymentMethod: orderData['paymentMethod'] as String,
+      subtotal: (orderData['subtotal'] as num).toDouble(),
+      shippingFee: (orderData['shippingFee'] as num).toDouble(),
+      total: (orderData['total'] as num).toDouble(),
+      status: _parseStatus(orderData['status'] as String),
+      createdAt: DateTime.parse(orderData['createdAt'] as String),
+      payUrl: payUrl,
     );
   }
 

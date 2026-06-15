@@ -48,6 +48,7 @@ class OrderEntity extends Equatable {
   final double total;
   final OrderStatus status;
   final DateTime createdAt;
+  final String? payUrl; // Added for MoMo payment
 
   const OrderEntity({
     required this.id,
@@ -59,6 +60,7 @@ class OrderEntity extends Equatable {
     required this.total,
     required this.status,
     required this.createdAt,
+    this.payUrl,
   });
 
   String get statusLabel {
