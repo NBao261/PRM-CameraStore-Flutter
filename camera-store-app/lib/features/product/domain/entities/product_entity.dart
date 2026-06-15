@@ -76,6 +76,11 @@ class ProductEntity extends Equatable {
 
   bool get hasDiscount => salePrice != null && salePrice! > 0 && salePrice! < price;
 
+  int get discountPercent {
+    if (!hasDiscount) return 0;
+    return (((price - salePrice!) / price) * 100).round();
+  }
+
   String get firstImage => images.isNotEmpty ? images.first : '';
 
   static String _formatCurrency(double amount) {
