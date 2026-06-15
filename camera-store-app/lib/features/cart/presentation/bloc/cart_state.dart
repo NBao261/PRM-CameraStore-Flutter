@@ -7,11 +7,14 @@ class CartState extends Equatable {
   final CartStatus status;
   final CartEntity? cart;
   final String? errorMessage;
+  /// Which product is currently being updated (for per-item loading indicator)
+  final String? updatingProductId;
 
   const CartState({
     this.status = CartStatus.initial,
     this.cart,
     this.errorMessage,
+    this.updatingProductId,
   });
 
   int get totalItems => cart?.totalItems ?? 0;
@@ -29,14 +32,17 @@ class CartState extends Equatable {
     CartStatus? status,
     CartEntity? cart,
     String? errorMessage,
+    String? updatingProductId,
+    bool clearUpdating = false,
   }) {
     return CartState(
       status: status ?? this.status,
       cart: cart ?? this.cart,
       errorMessage: errorMessage ?? this.errorMessage,
+      updatingProductId: clearUpdating ? null : (updatingProductId ?? this.updatingProductId),
     );
   }
 
   @override
-  List<Object?> get props => [status, cart, errorMessage];
+  List<Object?> get props => [status, cart, errorMessage, updatingProductId];
 }

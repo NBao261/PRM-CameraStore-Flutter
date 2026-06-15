@@ -32,6 +32,7 @@ class CartItemCard extends StatelessWidget {
     final unitPrice = product.hasDiscount ? product.salePrice! : product.price;
     final lineTotal = unitPrice * item.quantity;
     final isAtMaxStock = item.quantity >= product.stock;
+    final isLowStock = product.stock <= 3;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -85,7 +86,7 @@ class CartItemCard extends StatelessWidget {
                   ),
                 const SizedBox(height: 4),
 
-                // Name — 15sp for readability (mobile-typography.md)
+                // Name
                 Text(
                   product.name,
                   style: const TextStyle(
@@ -99,31 +100,27 @@ class CartItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
 
-                // Stock indicator
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: product.stock <= 3
-                        ? AppColors.errorLight
-                        : AppColors.surfaceDim,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    product.stock <= 3
-                        ? 'Còn ${product.stock} sản phẩm'
-                        : 'Kho: ${product.stock}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: product.stock <= 3
-                          ? AppColors.error
-                          : AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
+                // Stock badge — only show when low stock (≤ 3)
+                if (isLowStock)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.errorLight,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'Còn ${product.stock} sản phẩm',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.error,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
 
-                // Price
+                SizedBox(height: isLowStock ? 8 : 4),
+
+                // Price row
                 Row(
                   children: [
                     Text(
@@ -153,9 +150,7 @@ class CartItemCard extends StatelessWidget {
 
                 // ── Quantity Controller + Line Total ──
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Quantity Controller — 48dp touch targets
                     Container(
                       decoration: BoxDecoration(
                         color: AppColors.surfaceDim,
@@ -182,8 +177,7 @@ class CartItemCard extends StatelessWidget {
                                 ScaleTransition(scale: anim, child: child),
                             child: Padding(
                               key: ValueKey(item.quantity),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14),
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
                               child: Text(
                                 '${item.quantity}',
                                 style: const TextStyle(
@@ -218,13 +212,18 @@ class CartItemCard extends StatelessWidget {
                       ),
                     ),
 
-                    // Line Total
-                    Text(
-                      _formatPrice(lineTotal),
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                    // Line Total — Expanded to prevent overflow on long prices
+                    Expanded(
+                      child: Text(
+                        _formatPrice(lineTotal),
+                        textAlign: TextAlign.end,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                   ],
@@ -238,7 +237,7 @@ class CartItemCard extends StatelessWidget {
   }
 }
 
-/// 48dp touch target button (touch-psychology.md: min 48dp)
+/// 48dp touch target button
 class _QuantityButton extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -258,7 +257,7 @@ class _QuantityButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(100),
         child: SizedBox(
-          width: 44, // 44dp visual + padding = 48dp hit area
+          width: 44,
           height: 44,
           child: Center(
             child: Icon(icon, size: 20, color: color),

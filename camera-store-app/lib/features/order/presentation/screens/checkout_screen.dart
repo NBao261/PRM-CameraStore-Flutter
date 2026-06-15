@@ -90,11 +90,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         if (state.status == OrderBlocStatus.created) {
           // Reload cart (now empty)
           context.read<CartBloc>().add(const CartLoadRequested());
-          // Navigate to success
-          Navigator.of(context).pushReplacementNamed(
-            AppRouter.orderSuccess,
-            arguments: state.createdOrder,
-          );
+          // Navigate to MoMo payment or Success
+          if (state.createdOrder?.payUrl != null && state.createdOrder!.payUrl!.isNotEmpty) {
+            Navigator.of(context).pushReplacementNamed(
+              '/momo_payment',
+              arguments: state.createdOrder,
+            );
+          } else {
+            Navigator.of(context).pushReplacementNamed(
+              AppRouter.orderSuccess,
+              arguments: state.createdOrder,
+            );
+          }
         } else if (state.status == OrderBlocStatus.error) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

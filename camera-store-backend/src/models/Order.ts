@@ -19,6 +19,7 @@ export interface IOrder extends Document {
     note?: string;
   };
   paymentMethod: 'cod' | 'bank_transfer' | 'e_wallet';
+  paymentStatus: 'unpaid' | 'paid' | 'failed';
   subtotal: number;
   shippingFee: number;
   total: number;
@@ -49,6 +50,11 @@ const OrderSchema: Schema = new Schema(
       type: String,
       enum: ['cod', 'bank_transfer', 'e_wallet'],
       required: true,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['unpaid', 'paid', 'failed'],
+      default: 'unpaid',
     },
     subtotal:    { type: Number, required: true },
     shippingFee: { type: Number, default: 0 },

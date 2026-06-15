@@ -7,6 +7,7 @@ import '../../features/product/presentation/screens/product_detail_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/order/presentation/screens/checkout_screen.dart';
 import '../../features/order/presentation/screens/order_success_screen.dart';
+import '../../features/order/presentation/screens/momo_payment_screen.dart';
 import '../../features/order/domain/entities/order_entity.dart';
 
 class AppRouter {
@@ -39,6 +40,11 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const CartScreen());
       case checkout:
         return MaterialPageRoute(builder: (_) => const CheckoutScreen());
+      case '/momo_payment':
+        final order = settings.arguments as OrderEntity;
+        return MaterialPageRoute(
+          builder: (_) => MoMoPaymentScreen(order: order),
+        );
       case orderSuccess:
         final order = settings.arguments as OrderEntity;
         return MaterialPageRoute(

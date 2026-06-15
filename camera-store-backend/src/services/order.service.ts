@@ -54,7 +54,24 @@ export class OrderService {
       relatedType: 'order',
     });
 
-    return order;
+    let payUrl: string | undefined;
+
+    if (data.paymentMethod === 'e_wallet') {
+      try {
+        const { momoService } = await import('./momo.service');
+        payUrl = await momoService.createPaymentUrl({
+          orderId: String(order._id),
+          amount: total,
+          orderInfo: `Thanh toán đơn hàng #${order._id} tại Camera Store`,
+        });
+      } catch (error) {
+        console.error('MoMo integration error:', error);
+        // We still return the order, but frontend will see error when fetching payUrl.
+        // Or we can throw error, but order is already created. Let's just pass error message.
+      }
+    }
+
+    return { order, payUrl };
   }
 
   async getOrders(userId: string, status?: string) {

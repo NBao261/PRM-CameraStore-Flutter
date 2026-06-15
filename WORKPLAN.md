@@ -54,7 +54,7 @@ _Tương ứng với Phase 6_
 
 ---
 
-## Tuần 4: Đặt hàng & Thanh toán (Checkout & Billing)
+## Tuần 4: Đặt hàng & Thanh toán (Checkout & Billing) [x]
 
 _Tương ứng với Phase 7_
 
