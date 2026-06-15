@@ -13,6 +13,11 @@ export const registerValidator = [
   }),
 ];
 
+export const verifyOtpValidator = [
+  body('email').isEmail().withMessage('Email không hợp lệ'),
+  body('otp').isLength({ min: 6, max: 6 }).withMessage('Mã OTP phải có 6 chữ số'),
+];
+
 export const loginValidator = [
   body('email').isEmail().withMessage('Email không hợp lệ').normalizeEmail(),
   body('password').notEmpty().withMessage('Mật khẩu là bắt buộc'),
