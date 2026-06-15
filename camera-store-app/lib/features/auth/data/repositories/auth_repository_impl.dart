@@ -31,6 +31,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      await _remoteDataSource.verifyOtp(
+        email: email,
+        otp: otp,
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  @override
   Future<UserEntity> login({
     required String email,
     required String password,
