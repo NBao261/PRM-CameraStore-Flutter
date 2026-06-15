@@ -39,3 +39,7 @@ class CartItemRemoved extends CartEvent {
   @override
   List<Object?> get props => [productId];
 }
+
+class CartClearedAll extends CartEvent {
+  const CartClearedAll();
+}

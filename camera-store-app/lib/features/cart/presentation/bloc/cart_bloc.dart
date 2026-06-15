@@ -12,6 +12,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<CartItemAdded>(_onCartItemAdded);
     on<CartItemUpdated>(_onCartItemUpdated);
     on<CartItemRemoved>(_onCartItemRemoved);
+    on<CartClearedAll>(_onCartClearedAll);
   }
 
   String _parseError(dynamic e) {
@@ -31,11 +32,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     emit(state.copyWith(status: CartStatus.loading));
     try {
       final cart = await cartRepository.getCart();
-      emit(state.copyWith(status: CartStatus.loaded, cart: cart));
+      emit(state.copyWith(status: CartStatus.loaded, cart: cart, clearUpdating: true));
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
         errorMessage: _parseError(e),
+        clearUpdating: true,
       ));
     }
   }
@@ -44,13 +46,15 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartItemAdded event,
     Emitter<CartState> emit,
   ) async {
+    emit(state.copyWith(updatingProductId: event.productId));
     try {
       final cart = await cartRepository.addToCart(event.productId, event.quantity);
-      emit(state.copyWith(status: CartStatus.loaded, cart: cart));
+      emit(state.copyWith(status: CartStatus.loaded, cart: cart, clearUpdating: true));
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
         errorMessage: _parseError(e),
+        clearUpdating: true,
       ));
     }
   }
@@ -59,13 +63,15 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartItemUpdated event,
     Emitter<CartState> emit,
   ) async {
+    emit(state.copyWith(updatingProductId: event.productId));
     try {
       final cart = await cartRepository.updateCartItem(event.productId, event.quantity);
-      emit(state.copyWith(status: CartStatus.loaded, cart: cart));
+      emit(state.copyWith(status: CartStatus.loaded, cart: cart, clearUpdating: true));
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
         errorMessage: _parseError(e),
+        clearUpdating: true,
       ));
     }
   }
@@ -74,13 +80,37 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartItemRemoved event,
     Emitter<CartState> emit,
   ) async {
+    emit(state.copyWith(updatingProductId: event.productId));
     try {
       final cart = await cartRepository.removeFromCart(event.productId);
-      emit(state.copyWith(status: CartStatus.loaded, cart: cart));
+      emit(state.copyWith(status: CartStatus.loaded, cart: cart, clearUpdating: true));
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
         errorMessage: _parseError(e),
+        clearUpdating: true,
+      ));
+    }
+  }
+
+  Future<void> _onCartClearedAll(
+    CartClearedAll event,
+    Emitter<CartState> emit,
+  ) async {
+    emit(state.copyWith(status: CartStatus.loading));
+    try {
+      // Remove all items sequentially
+      final items = List.of(state.cart?.items ?? []);
+      for (final item in items) {
+        await cartRepository.removeFromCart(item.product.id);
+      }
+      final cart = await cartRepository.getCart();
+      emit(state.copyWith(status: CartStatus.loaded, cart: cart, clearUpdating: true));
+    } catch (e) {
+      emit(state.copyWith(
+        status: CartStatus.error,
+        errorMessage: _parseError(e),
+        clearUpdating: true,
       ));
     }
   }
