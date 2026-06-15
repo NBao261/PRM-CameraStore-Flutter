@@ -68,3 +68,13 @@ class CategoryModel {
     );
   }
 }
+
+class BrandModel {
+  static BrandEntity fromJson(Map<String, dynamic> json) {
+    return BrandEntity(
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      slug: json['slug'],
+    );
+  }
+}

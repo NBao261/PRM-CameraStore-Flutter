@@ -14,7 +14,8 @@ class CartModel extends CartEntity {
       id: json['_id'] ?? '',
       userId: json['user'] is Map ? json['user']['_id'] ?? '' : json['user'] ?? '',
       items: (json['items'] as List<dynamic>?)
-              ?.map((item) => CartItemModel.fromJson(item))
+              ?.where((item) => item != null && item['product'] != null)
+              .map((item) => CartItemModel.fromJson(item as Map<String, dynamic>))
               .toList() ??
           [],
       updatedAt: json['updatedAt'] != null

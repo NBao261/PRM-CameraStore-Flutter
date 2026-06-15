@@ -362,12 +362,7 @@ class _CartScreenState extends State<CartScreen> {
                               child: ElevatedButton(
                                 onPressed: () {
                                   HapticFeedback.mediumImpact();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Tính năng Checkout sẽ được triển khai ở Tuần 4!'),
-                                      backgroundColor: AppColors.primary,
-                                    ),
-                                  );
+                                  Navigator.of(context).pushNamed('/checkout');
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,

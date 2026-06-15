@@ -7,7 +7,9 @@ class FilterBottomSheet extends StatefulWidget {
   final String? selectedCategory;
   final double? minPrice;
   final double? maxPrice;
-  final Function({String? category, double? minPrice, double? maxPrice}) onApply;
+  final String? sortOption;
+  final Function({String? category, double? minPrice, double? maxPrice, String? sortOption})
+      onApply;
 
   const FilterBottomSheet({
     super.key,
@@ -15,35 +17,35 @@ class FilterBottomSheet extends StatefulWidget {
     this.selectedCategory,
     this.minPrice,
     this.maxPrice,
+    this.sortOption,
     required this.onApply,
   });
 
   @override
   State<FilterBottomSheet> createState() => _FilterBottomSheetState();
 }
-
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   String? _selectedCategory;
-  final _minPriceController = TextEditingController();
-  final _maxPriceController = TextEditingController();
+  String? _sortOption;
+  double? _minPrice;
+  double? _maxPrice;
+
+  final List<Map<String, dynamic>> _priceRanges = [
+    {'label': 'Tất cả', 'min': null, 'max': null},
+    {'label': 'Dưới 5 triệu', 'min': null, 'max': 5000000.0},
+    {'label': '5 - 10 triệu', 'min': 5000000.0, 'max': 10000000.0},
+    {'label': '10 - 20 triệu', 'min': 10000000.0, 'max': 20000000.0},
+    {'label': '20 - 50 triệu', 'min': 20000000.0, 'max': 50000000.0},
+    {'label': 'Trên 50 triệu', 'min': 50000000.0, 'max': null},
+  ];
 
   @override
   void initState() {
     super.initState();
     _selectedCategory = widget.selectedCategory;
-    if (widget.minPrice != null) {
-      _minPriceController.text = widget.minPrice!.toStringAsFixed(0);
-    }
-    if (widget.maxPrice != null) {
-      _maxPriceController.text = widget.maxPrice!.toStringAsFixed(0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _minPriceController.dispose();
-    _maxPriceController.dispose();
-    super.dispose();
+    _sortOption = widget.sortOption;
+    _minPrice = widget.minPrice;
+    _maxPrice = widget.maxPrice;
   }
 
   @override
@@ -87,8 +89,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   onPressed: () {
                     setState(() {
                       _selectedCategory = null;
-                      _minPriceController.clear();
-                      _maxPriceController.clear();
+                      _sortOption = null;
+                      _minPrice = null;
+                      _maxPrice = null;
                     });
                   },
                   child: const Text(
@@ -124,9 +127,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               const SizedBox(height: 24),
             ],
 
-            // Price range
+            // Sort section
             const Text(
-              'Khoảng giá (VNĐ)',
+              'Sắp xếp',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 15,
@@ -134,53 +137,72 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ),
             ),
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _minPriceController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'Từ',
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Text('—', style: TextStyle(color: AppColors.textHint)),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _maxPriceController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'Đến',
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
+                _buildSortChip(null, 'Mới nhất'),
+                _buildSortChip('name_asc', 'Tên A-Z'),
+                _buildSortChip('name_desc', 'Tên Z-A'),
+                _buildSortChip('price_asc', 'Giá tăng dần'),
+                _buildSortChip('price_desc', 'Giá giảm dần'),
               ],
+            ),
+            const SizedBox(height: 24),
+
+            // Price range
+            const Text(
+              'Khoảng giá',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _priceRanges.map((range) {
+                final isSelected = _minPrice == range['min'] && _maxPrice == range['max'];
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _minPrice = range['min'] as double?;
+                      _maxPrice = range['max'] as double?;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.primary : AppColors.background,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected ? AppColors.primary : AppColors.border,
+                      ),
+                    ),
+                    child: Text(
+                      range['label'] as String,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: isSelected ? Colors.white : AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 32),
 
             // Apply button
             ElevatedButton(
               onPressed: () {
-                final minPrice = double.tryParse(_minPriceController.text);
-                final maxPrice = double.tryParse(_maxPriceController.text);
                 widget.onApply(
                   category: _selectedCategory,
-                  minPrice: minPrice,
-                  maxPrice: maxPrice,
+                  minPrice: _minPrice,
+                  maxPrice: _maxPrice,
+                  sortOption: _sortOption,
                 );
                 Navigator.pop(context);
               },
@@ -206,6 +228,31 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     final isSelected = _selectedCategory == categoryId;
     return GestureDetector(
       onTap: () => setState(() => _selectedCategory = categoryId),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : AppColors.background,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: isSelected ? Colors.white : AppColors.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortChip(String? sortValue, String label) {
+    final isSelected = _sortOption == sortValue;
+    return GestureDetector(
+      onTap: () => setState(() => _sortOption = sortValue),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(

@@ -142,6 +142,124 @@ const seedDatabase = async () => {
         stock: 20,
         isActive: true,
         warranty: '12 Tháng'
+      },
+      {
+        name: 'Nikon Z6 II Mirrorless Camera',
+        brand: brandMap['nikon'],
+        category: categoryMap['mirrorless'],
+        images: [
+          '/public/images/products/nikon-z6ii-1.jpg',
+          '/public/images/products/nikon-z6ii-2.jpg',
+        ],
+        price: 49990000,
+        salePrice: 47990000,
+        description: 'Nikon Z6 II là máy ảnh mirrorless đa dụng mạnh mẽ với 2 bộ xử lý EXPEED 6 và khả năng quay video 4K tuyệt vời.',
+        specs: {
+          megapixel: '24.5MP',
+          sensor: 'Full-frame BSI CMOS',
+          isoRange: '100-51200',
+          video: '4K 30p',
+          connectivity: 'Wi-Fi, Bluetooth',
+          weight: '705g'
+        },
+        stock: 12,
+        isActive: true,
+        warranty: '24 Tháng'
+      },
+      {
+        name: 'Canon EOS 5D Mark IV DSLR',
+        brand: brandMap['canon'],
+        category: categoryMap['dslr'],
+        images: [
+          '/public/images/products/canon-5d4-1.jpg',
+          '/public/images/products/canon-5d4-2.jpg',
+        ],
+        price: 65990000,
+        salePrice: null,
+        description: 'Máy ảnh DSLR Full-frame huyền thoại của Canon với cảm biến 30.4MP, hệ thống lấy nét Dual Pixel CMOS AF.',
+        specs: {
+          megapixel: '30.4MP',
+          sensor: 'Full-frame CMOS',
+          isoRange: '100-32000',
+          video: '4K 30p',
+          connectivity: 'Wi-Fi, GPS',
+          weight: '890g'
+        },
+        stock: 4,
+        isActive: true,
+        warranty: '24 Tháng'
+      },
+      {
+        name: 'Fujifilm XF 35mm f/1.4 R Lens',
+        brand: brandMap['fujifilm'],
+        category: categoryMap['lens'],
+        images: [
+          '/public/images/products/fuji-35-1.jpg',
+        ],
+        price: 13500000,
+        salePrice: 12900000,
+        description: 'Ống kính tiêu chuẩn kinh điển của Fujifilm, mang lại hiệu ứng bokeh mượt mà và chất lượng quang học xuất sắc.',
+        specs: {
+          lensType: 'Prime',
+          weight: '187g'
+        },
+        stock: 25,
+        isActive: true,
+        warranty: '12 Tháng'
+      },
+      {
+        name: 'Sony NP-FZ100 Rechargeable Battery',
+        brand: brandMap['sony'],
+        category: categoryMap['accessories'],
+        images: [
+          '/public/images/products/sony-battery-1.jpg',
+        ],
+        price: 1990000,
+        salePrice: null,
+        description: 'Pin sạc Lithium-Ion dung lượng cao chính hãng dành cho các dòng máy ảnh Sony Alpha.',
+        specs: {
+          battery: '2280 mAh',
+          weight: '83g'
+        },
+        stock: 50,
+        isActive: true,
+        warranty: '6 Tháng'
+      },
+      {
+        name: 'Canon LP-E6NH Battery Pack',
+        brand: brandMap['canon'],
+        category: categoryMap['accessories'],
+        images: [
+          '/public/images/products/canon-battery-1.jpg',
+        ],
+        price: 2650000,
+        salePrice: 2500000,
+        description: 'Pin sạc chính hãng Canon dung lượng 2130mAh, tương thích với EOS R5, R6, và các dòng máy dùng LP-E6.',
+        specs: {
+          battery: '2130 mAh',
+          weight: '80g'
+        },
+        stock: 30,
+        isActive: true,
+        warranty: '6 Tháng'
+      },
+      {
+        name: 'Nikon NIKKOR Z 50mm f/1.8 S Lens',
+        brand: brandMap['nikon'],
+        category: categoryMap['lens'],
+        images: [
+          '/public/images/products/nikon-50-1.jpg',
+        ],
+        price: 14500000,
+        salePrice: null,
+        description: 'Ống kính tiêu chuẩn dòng S-Line của Nikon dành cho hệ thống ngàm Z, độ sắc nét hoàn hảo từ tâm đến rìa.',
+        specs: {
+          lensType: 'Prime',
+          weight: '415g'
+        },
+        stock: 18,
+        isActive: true,
+        warranty: '12 Tháng'
       }
     ];
 

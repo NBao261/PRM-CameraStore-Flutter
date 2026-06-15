@@ -7,9 +7,12 @@ abstract class ProductRepository {
     String? brand,
     double? minPrice,
     double? maxPrice,
+    String? sort,
   });
 
   Future<ProductEntity> getProductById(String id);
 
   Future<List<CategoryEntity>> getCategories();
+
+  Future<List<BrandEntity>> getBrands();
 }
