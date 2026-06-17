@@ -53,3 +53,13 @@ export const updateProfile = async (req: IAuthRequest, _res: Response, next: Nex
     next(error);
   }
 };
+
+// PUT /api/auth/change-password
+export const changePassword = async (req: IAuthRequest, _res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await authService.changePassword(req.user!.id, req.body);
+    ApiResponse.success(_res, data, data.message);
+  } catch (error) {
+    next(error);
+  }
+};

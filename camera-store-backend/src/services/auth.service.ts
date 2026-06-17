@@ -129,6 +129,27 @@ export class AuthService {
     return user;
   }
 
+  async changePassword(userId: string, data: { oldPassword?: string; newPassword?: string }) {
+    if (!data.oldPassword || !data.newPassword) {
+      throw new ConflictError('Vui lòng cung cấp mật khẩu cũ và mới');
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new NotFoundError('Không tìm thấy người dùng');
+    }
+
+    const isMatch = await bcrypt.compare(data.oldPassword, user.password);
+    if (!isMatch) {
+      throw new UnauthorizedError('Mật khẩu cũ không chính xác');
+    }
+
+    user.password = await bcrypt.hash(data.newPassword, 10);
+    await user.save();
+
+    return { message: 'Đổi mật khẩu thành công' };
+  }
+
   private generateToken(user: IUser): string {
     return jwt.sign(
       { id: user._id, email: user.email, role: user.role },
