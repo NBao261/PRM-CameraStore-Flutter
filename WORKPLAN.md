@@ -69,7 +69,7 @@ _Tương ứng với Phase 7_
 
 ---
 
-## Tuần 5: Quản lý Đơn hàng (Order History)
+## Tuần 5: Quản lý Đơn hàng (Order History) [x]
 
 _Tương ứng với Phase 8_
 

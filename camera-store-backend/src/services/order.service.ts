@@ -22,6 +22,7 @@ export class OrderService {
       name: item.product.name,
       price: item.product.salePrice || item.product.price,
       quantity: item.quantity,
+      imageUrl: item.product.images?.[0] || '',
     }));
 
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
