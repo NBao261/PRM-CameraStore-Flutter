@@ -5,9 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/routes/app_router.dart';
 import '../../../../core/widgets/cart_icon_badge.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../notification/presentation/widgets/notification_icon_badge.dart';
 import '../bloc/product_bloc.dart';
 import '../bloc/product_event.dart';
 import '../bloc/product_state.dart';
@@ -85,6 +88,87 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBodyBehindAppBar: true,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                final user = state.user;
+                return DrawerHeader(
+                  decoration: const BoxDecoration(color: AppColors.primary),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.person, size: user != null ? 56 : 56, color: AppColors.primary), // Future: network image if user.avatar exists
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        user?.fullName ?? 'Khách hàng',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (user?.email != null)
+                        Text(
+                          user!.email,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.home_outlined, color: AppColors.primary),
+              title: const Text('Trang chủ', style: TextStyle(fontWeight: FontWeight.w600)),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.receipt_long_outlined, color: AppColors.primary),
+              title: const Text('Đơn đã mua', style: TextStyle(fontWeight: FontWeight.w600)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRouter.orderHistory);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person_outline, color: AppColors.primary),
+              title: const Text('Hồ sơ của tôi', style: TextStyle(fontWeight: FontWeight.w600)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRouter.profile);
+              },
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Divider(),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout, color: AppColors.error),
+              title: const Text('Đăng xuất', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w600)),
+              onTap: () {
+                Navigator.pop(context);
+                context.read<AuthBloc>().add(AuthLogoutRequested());
+              },
+            ),
+          ],
+        ),
+      ),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: ClipRRect(
@@ -99,13 +183,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
               foregroundColor: Colors.white,
               elevation: 0,
               actions: [
+                const NotificationIconBadge(),
                 CartIconBadge(cartIconKey: _cartIconKey),
-                IconButton(
-                  icon: const Icon(Icons.logout),
-                  onPressed: () {
-                    context.read<AuthBloc>().add(AuthLogoutRequested());
-                  },
-                ),
+                const SizedBox(width: 8),
               ],
             ),
           ),

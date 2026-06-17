@@ -63,4 +63,33 @@ class AuthRemoteDataSource {
     final response = await _apiClient.dio.get(ApiEndpoints.profile);
     return UserModel.fromJson(response.data['data']);
   }
+
+  Future<UserModel> updateProfile({
+    String? fullName,
+    String? phone,
+    String? address,
+  }) async {
+    final response = await _apiClient.dio.put(
+      ApiEndpoints.profile,
+      data: {
+        if (fullName != null) 'fullName': fullName,
+        if (phone != null) 'phone': phone,
+        if (address != null) 'address': address,
+      },
+    );
+    return UserModel.fromJson(response.data['data']);
+  }
+
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    await _apiClient.dio.put(
+      ApiEndpoints.changePassword,
+      data: {
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      },
+    );
+  }
 }
