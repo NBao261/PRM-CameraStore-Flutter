@@ -276,6 +276,17 @@ class _CartScreenState extends State<CartScreen> {
                   },
                   child: CartItemCard(
                     item: item,
+                    isSelected: state.selectedItemIds.contains(item.product.id),
+                    onSelectionChanged: (bool? val) {
+                      if (val != null) {
+                        context.read<CartBloc>().add(
+                          CartItemSelectionToggled(
+                            productId: item.product.id,
+                            isSelected: val,
+                          ),
+                        );
+                      }
+                    },
                     onIncrement: () {
                       if (item.quantity >= item.product.stock) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -378,25 +389,58 @@ class _CartScreenState extends State<CartScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Item count summary
+                      // Item count summary & Select All
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            '${state.totalItems} sản phẩm',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: Checkbox(
+                                  value: state.selectedItemIds.length == items.length && items.isNotEmpty,
+                                  onChanged: (val) {
+                                    if (val != null) {
+                                      context.read<CartBloc>().add(CartAllItemsSelectionToggled(isSelected: val));
+                                    }
+                                  },
+                                  activeColor: AppColors.primary,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Chọn tất cả',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            'Tiết kiệm được ${_formatPrice(_calcSaving(state))}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '${state.selectedTotalItems} sản phẩm',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              if (_calcSaving(state) > 0)
+                                Text(
+                                  'Tiết kiệm được ${_formatPrice(_calcSaving(state))}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.success,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -428,8 +472,8 @@ class _CartScreenState extends State<CartScreen> {
                                     fit: BoxFit.scaleDown,
                                     alignment: Alignment.centerLeft,
                                     child: Text(
-                                      _formatPrice(state.totalAmount),
-                                      key: ValueKey(state.totalAmount),
+                                      _formatPrice(state.selectedTotalAmount),
+                                      key: ValueKey(state.selectedTotalAmount),
                                       style: const TextStyle(
                                         fontSize: 24,
                                         fontWeight: FontWeight.w900,
@@ -467,14 +511,17 @@ class _CartScreenState extends State<CartScreen> {
                                 ],
                               ),
                               child: ElevatedButton(
-                                onPressed: () {
-                                  HapticFeedback.mediumImpact();
-                                  Navigator.of(context)
-                                      .pushNamed('/checkout');
-                                },
+                                onPressed: state.selectedItemIds.isEmpty
+                                    ? null
+                                    : () {
+                                        HapticFeedback.mediumImpact();
+                                        Navigator.of(context).pushNamed('/checkout');
+                                      },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   shadowColor: Colors.transparent,
+                                  disabledBackgroundColor: Colors.transparent,
+                                  disabledForegroundColor: Colors.white.withOpacity(0.5),
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 18),
                                   shape: RoundedRectangleBorder(

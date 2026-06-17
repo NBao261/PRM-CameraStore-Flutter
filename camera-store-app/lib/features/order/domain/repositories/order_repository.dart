@@ -5,6 +5,7 @@ abstract class OrderRepository {
   Future<OrderEntity> createOrder({
     required ShippingInfo shippingInfo,
     required String paymentMethod,
+    List<String>? productIds,
   });
 
   /// Get list of orders, optionally filtered by status

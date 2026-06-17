@@ -13,6 +13,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<CartItemUpdated>(_onCartItemUpdated);
     on<CartItemRemoved>(_onCartItemRemoved);
     on<CartClearedAll>(_onCartClearedAll);
+    on<CartItemSelectionToggled>(_onCartItemSelectionToggled);
+    on<CartAllItemsSelectionToggled>(_onCartAllItemsSelectionToggled);
   }
 
   String _parseError(dynamic e) {
@@ -32,7 +34,13 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     emit(state.copyWith(status: CartStatus.loading));
     try {
       final cart = await cartRepository.getCart();
-      emit(state.copyWith(status: CartStatus.loaded, cart: cart, clearUpdating: true));
+      final allItemIds = cart.items.map((e) => e.product.id).toSet();
+      emit(state.copyWith(
+        status: CartStatus.loaded,
+        cart: cart,
+        clearUpdating: true,
+        selectedItemIds: allItemIds,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
@@ -49,7 +57,13 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     emit(state.copyWith(updatingProductId: event.productId));
     try {
       final cart = await cartRepository.addToCart(event.productId, event.quantity);
-      emit(state.copyWith(status: CartStatus.loaded, cart: cart, clearUpdating: true));
+      final newSelected = Set<String>.from(state.selectedItemIds)..add(event.productId);
+      emit(state.copyWith(
+        status: CartStatus.loaded,
+        cart: cart,
+        clearUpdating: true,
+        selectedItemIds: newSelected,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
@@ -83,7 +97,13 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     emit(state.copyWith(updatingProductId: event.productId));
     try {
       final cart = await cartRepository.removeFromCart(event.productId);
-      emit(state.copyWith(status: CartStatus.loaded, cart: cart, clearUpdating: true));
+      final newSelected = Set<String>.from(state.selectedItemIds)..remove(event.productId);
+      emit(state.copyWith(
+        status: CartStatus.loaded,
+        cart: cart,
+        clearUpdating: true,
+        selectedItemIds: newSelected,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
@@ -105,13 +125,45 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         await cartRepository.removeFromCart(item.product.id);
       }
       final cart = await cartRepository.getCart();
-      emit(state.copyWith(status: CartStatus.loaded, cart: cart, clearUpdating: true));
+      emit(state.copyWith(
+        status: CartStatus.loaded,
+        cart: cart,
+        clearUpdating: true,
+        selectedItemIds: {},
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: CartStatus.error,
         errorMessage: _parseError(e),
         clearUpdating: true,
       ));
+    }
+  }
+
+  void _onCartItemSelectionToggled(
+    CartItemSelectionToggled event,
+    Emitter<CartState> emit,
+  ) {
+    final newSelected = Set<String>.from(state.selectedItemIds);
+    if (event.isSelected) {
+      newSelected.add(event.productId);
+    } else {
+      newSelected.remove(event.productId);
+    }
+    emit(state.copyWith(selectedItemIds: newSelected));
+  }
+
+  void _onCartAllItemsSelectionToggled(
+    CartAllItemsSelectionToggled event,
+    Emitter<CartState> emit,
+  ) {
+    if (state.cart == null) return;
+    
+    if (event.isSelected) {
+      final allItemIds = state.cart!.items.map((e) => e.product.id).toSet();
+      emit(state.copyWith(selectedItemIds: allItemIds));
+    } else {
+      emit(state.copyWith(selectedItemIds: {}));
     }
   }
 }

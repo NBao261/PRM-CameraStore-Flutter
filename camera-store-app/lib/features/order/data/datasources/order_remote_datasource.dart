@@ -27,6 +27,7 @@ class OrderRemoteDataSource {
   Future<OrderEntity> createOrder({
     required ShippingInfo shippingInfo,
     required String paymentMethod,
+    List<String>? productIds,
   }) async {
     final response = await apiClient.dio.post('/orders', data: {
       'shippingInfo': {
@@ -36,6 +37,7 @@ class OrderRemoteDataSource {
         'note': shippingInfo.note,
       },
       'paymentMethod': paymentMethod,
+      if (productIds != null && productIds.isNotEmpty) 'productIds': productIds,
     });
     return OrderModel.fromJson(_extractData(response.data));
   }

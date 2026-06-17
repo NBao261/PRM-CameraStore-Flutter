@@ -9,16 +9,36 @@ class CartState extends Equatable {
   final String? errorMessage;
   /// Which product is currently being updated (for per-item loading indicator)
   final String? updatingProductId;
+  /// Set of product IDs that are selected for checkout
+  final Set<String> selectedItemIds;
 
   const CartState({
     this.status = CartStatus.initial,
     this.cart,
     this.errorMessage,
     this.updatingProductId,
+    this.selectedItemIds = const {},
   });
 
   int get totalItems => cart?.totalItems ?? 0;
   double get totalAmount => cart?.totalAmount ?? 0;
+
+  int get selectedTotalItems {
+    if (cart == null) return 0;
+    return cart!.items
+        .where((item) => selectedItemIds.contains(item.product.id))
+        .fold(0, (sum, item) => sum + item.quantity);
+  }
+
+  double get selectedTotalAmount {
+    if (cart == null) return 0;
+    return cart!.items
+        .where((item) => selectedItemIds.contains(item.product.id))
+        .fold(0, (sum, item) {
+      final price = item.product.hasDiscount ? item.product.salePrice! : item.product.price;
+      return sum + (price * item.quantity);
+    });
+  }
 
   /// Get current quantity of a specific product in the cart
   int getQuantityForProduct(String productId) {
@@ -33,6 +53,7 @@ class CartState extends Equatable {
     CartEntity? cart,
     String? errorMessage,
     String? updatingProductId,
+    Set<String>? selectedItemIds,
     bool clearUpdating = false,
   }) {
     return CartState(
@@ -40,9 +61,10 @@ class CartState extends Equatable {
       cart: cart ?? this.cart,
       errorMessage: errorMessage ?? this.errorMessage,
       updatingProductId: clearUpdating ? null : (updatingProductId ?? this.updatingProductId),
+      selectedItemIds: selectedItemIds ?? this.selectedItemIds,
     );
   }
 
   @override
-  List<Object?> get props => [status, cart, errorMessage, updatingProductId];
+  List<Object?> get props => [status, cart, errorMessage, updatingProductId, selectedItemIds];
 }

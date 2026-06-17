@@ -11,14 +11,16 @@ abstract class OrderEvent extends Equatable {
 class OrderCreateRequested extends OrderEvent {
   final ShippingInfo shippingInfo;
   final String paymentMethod;
+  final List<String>? productIds;
 
   const OrderCreateRequested({
     required this.shippingInfo,
     required this.paymentMethod,
+    this.productIds,
   });
 
   @override
-  List<Object?> get props => [shippingInfo, paymentMethod];
+  List<Object?> get props => [shippingInfo, paymentMethod, productIds];
 }
 
 class OrdersLoadRequested extends OrderEvent {

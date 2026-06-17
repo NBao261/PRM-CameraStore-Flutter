@@ -8,6 +8,7 @@ import '../../../cart/presentation/bloc/cart_bloc.dart';
 import '../../../cart/presentation/bloc/cart_event.dart';
 import '../../../cart/presentation/bloc/cart_state.dart';
 import '../../domain/entities/order_entity.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../bloc/order_bloc.dart';
 import '../bloc/order_event.dart';
 import '../bloc/order_state.dart';
@@ -50,6 +51,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState.user != null) {
+      _nameController.text = authState.user!.fullName;
+      _phoneController.text = authState.user!.phone ?? '';
+      _addressController.text = authState.user!.address ?? '';
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
@@ -69,6 +81,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void _submitOrder() {
     if (!_formKey.currentState!.validate()) return;
 
+    final selectedProductIds =
+        context.read<CartBloc>().state.selectedItemIds.toList();
+
     HapticFeedback.mediumImpact();
     context.read<OrderBloc>().add(
           OrderCreateRequested(
@@ -79,6 +94,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               note: _noteController.text.trim(),
             ),
             paymentMethod: _selectedPayment,
+            productIds: selectedProductIds.isNotEmpty ? selectedProductIds : null,
           ),
         );
   }
@@ -147,25 +163,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             icon: Icons.shopping_bag_outlined,
                             child: Column(
                               children: [
-                                ...cartState.cart!.items.map((item) {
-                                    final effectivePrice =
-                                        (item.product.salePrice ?? 0) > 0
-                                            ? item.product.salePrice!
-                                            : item.product.price;
-                                    return _buildOrderItem(
-                                      item.product.name,
-                                      item.quantity,
-                                      effectivePrice,
-                                    );
-                                  }),
+                                ...cartState.cart!.items
+                                    .where((item) => cartState.selectedItemIds
+                                        .contains(item.product.id))
+                                    .map((item) {
+                                  final effectivePrice =
+                                      (item.product.salePrice ?? 0) > 0
+                                          ? item.product.salePrice!
+                                          : item.product.price;
+                                  return _buildOrderItem(
+                                    item.product.name,
+                                    item.quantity,
+                                    effectivePrice,
+                                  );
+                                }),
                                 const Divider(height: 24),
-                                _buildPriceRow('Tạm tính', cartState.totalAmount),
+                                _buildPriceRow('Tạm tính', cartState.selectedTotalAmount),
                                 const SizedBox(height: 6),
                                 _buildPriceRow('Phí vận chuyển', 0, isFree: true),
                                 const Divider(height: 20),
                                 _buildPriceRow(
                                   'Tổng cộng',
-                                  cartState.totalAmount,
+                                  cartState.selectedTotalAmount,
                                   isTotal: true,
                                 ),
                               ],
@@ -333,7 +352,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          _formatPrice(cartState.totalAmount),
+                          _formatPrice(cartState.selectedTotalAmount),
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
