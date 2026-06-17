@@ -21,6 +21,9 @@ import 'features/order/data/datasources/order_remote_datasource.dart';
 import 'features/order/data/repositories/order_repository_impl.dart';
 import 'features/order/presentation/bloc/order_bloc.dart';
 import 'features/product/presentation/screens/product_list_screen.dart';
+import 'features/notification/data/repositories/notification_repository_impl.dart';
+import 'features/notification/presentation/bloc/notification_bloc.dart';
+import 'features/notification/presentation/bloc/notification_event.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +48,8 @@ class CameraStoreApp extends StatelessWidget {
     final orderRemoteDataSource = OrderRemoteDataSource(apiClient);
     final orderRepository = OrderRepositoryImpl(orderRemoteDataSource);
 
+    final notificationRepository = NotificationRepositoryImpl(apiClient);
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -59,6 +64,9 @@ class CameraStoreApp extends StatelessWidget {
         BlocProvider(
           create: (_) => OrderBloc(orderRepository: orderRepository),
         ),
+        BlocProvider(
+          create: (_) => NotificationBloc(notificationRepository),
+        ),
       ],
       child: MaterialApp(
         title: AppStrings.appName,
@@ -70,6 +78,7 @@ class CameraStoreApp extends StatelessWidget {
           listener: (context, state) {
             if (state.status == AuthStatus.authenticated) {
               context.read<CartBloc>().add(const CartLoadRequested());
+              context.read<NotificationBloc>().add(NotificationLoadRequested());
             }
           },
           child: BlocBuilder<AuthBloc, AuthState>(

@@ -8,7 +8,11 @@ import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/order/presentation/screens/checkout_screen.dart';
 import '../../features/order/presentation/screens/order_success_screen.dart';
 import '../../features/order/presentation/screens/momo_payment_screen.dart';
+import '../../features/order/presentation/screens/order_history_screen.dart';
+import '../../features/order/presentation/screens/order_detail_screen.dart';
 import '../../features/order/domain/entities/order_entity.dart';
+import '../../features/profile/presentation/screens/user_profile_screen.dart';
+import '../../features/profile/presentation/screens/change_password_screen.dart';
 
 class AppRouter {
   static const String login = '/login';
@@ -19,6 +23,10 @@ class AppRouter {
   static const String cart = '/cart';
   static const String checkout = '/checkout';
   static const String orderSuccess = '/order-success';
+  static const String orderHistory = '/order-history';
+  static const String orderDetail = '/order-detail';
+  static const String profile = '/profile';
+  static const String changePassword = '/change-password';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -50,6 +58,17 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => OrderSuccessScreen(order: order),
         );
+      case orderHistory:
+        return MaterialPageRoute(builder: (_) => const OrderHistoryScreen());
+      case orderDetail:
+        final orderId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (_) => OrderDetailScreen(orderId: orderId),
+        );
+      case profile:
+        return MaterialPageRoute(builder: (_) => const UserProfileScreen());
+      case changePassword:
+        return MaterialPageRoute(builder: (_) => const ChangePasswordScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
