@@ -33,6 +33,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.done_all),
+            tooltip: 'Đọc tất cả',
+            onPressed: () {
+              context.read<NotificationBloc>().add(NotificationMarkAllAsReadRequested());
+            },
+          ),
+        ],
       ),
       body: BlocBuilder<NotificationBloc, NotificationState>(
         builder: (context, state) {

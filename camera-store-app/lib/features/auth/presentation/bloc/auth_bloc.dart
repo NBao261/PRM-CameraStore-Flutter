@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/network/socket_service.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -25,14 +26,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final isLoggedIn = await _authRepository.isLoggedIn();
       if (isLoggedIn) {
         final user = await _authRepository.getProfile();
+        SocketService().connect(user.id);
         emit(state.copyWith(
           status: AuthStatus.authenticated,
           user: user,
         ));
       } else {
+        SocketService().disconnect();
         emit(state.copyWith(status: AuthStatus.unauthenticated));
       }
     } catch (e) {
+      SocketService().disconnect();
       emit(state.copyWith(status: AuthStatus.unauthenticated));
     }
   }
@@ -47,6 +51,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: event.email,
         password: event.password,
       );
+      SocketService().connect(user.id);
       emit(state.copyWith(
         status: AuthStatus.authenticated,
         user: user,
@@ -110,6 +115,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     await _authRepository.logout();
+    SocketService().disconnect();
     emit(const AuthState(status: AuthStatus.unauthenticated));
   }
 

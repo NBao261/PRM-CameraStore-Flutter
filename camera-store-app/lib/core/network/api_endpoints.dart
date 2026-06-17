@@ -23,6 +23,7 @@ class ApiEndpoints {
   // Notifications
   static const String notifications = '/notifications';
   static const String readNotification = '/notifications/read';
+  static const String readAllNotifications = '/notifications/read-all';
 
   // Stores
   static const String stores = '/stores';
