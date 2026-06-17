@@ -24,18 +24,20 @@ class OrderItemEntity extends Equatable {
   final String name;
   final double price;
   final int quantity;
+  final String imageUrl;
 
   const OrderItemEntity({
     required this.productId,
     required this.name,
     required this.price,
     required this.quantity,
+    this.imageUrl = '',
   });
 
   double get lineTotal => price * quantity;
 
   @override
-  List<Object?> get props => [productId, name, price, quantity];
+  List<Object?> get props => [productId, name, price, quantity, imageUrl];
 }
 
 class OrderEntity extends Equatable {

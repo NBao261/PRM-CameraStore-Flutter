@@ -28,3 +28,8 @@ export const updateProfileValidator = [
   body('phone').optional().notEmpty().withMessage('Số điện thoại không được để trống').trim(),
   body('address').optional().trim(),
 ];
+
+export const changePasswordValidator = [
+  body('oldPassword').notEmpty().withMessage('Mật khẩu cũ là bắt buộc'),
+  body('newPassword').isLength({ min: 6 }).withMessage('Mật khẩu mới phải có ít nhất 6 ký tự'),
+];

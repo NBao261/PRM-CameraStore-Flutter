@@ -20,6 +20,17 @@ abstract class AuthRepository {
 
   Future<UserEntity> getProfile();
 
+  Future<UserEntity> updateProfile({
+    String? fullName,
+    String? phone,
+    String? address,
+  });
+
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  });
+
   Future<void> logout();
 
   Future<bool> isLoggedIn();

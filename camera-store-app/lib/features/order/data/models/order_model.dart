@@ -16,6 +16,7 @@ class OrderModel {
                 name: item['name'] as String,
                 price: (item['price'] as num).toDouble(),
                 quantity: item['quantity'] as int,
+                imageUrl: item['imageUrl'] as String? ?? '',
               ))
           .toList(),
       shippingInfo: ShippingInfo(

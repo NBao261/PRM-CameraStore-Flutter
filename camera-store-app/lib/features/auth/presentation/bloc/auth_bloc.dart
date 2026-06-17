@@ -13,6 +13,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRegisterRequested>(_onRegisterRequested);
     on<AuthVerifyOtpRequested>(_onVerifyOtpRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
+    on<AuthProfileUpdateRequested>(_onProfileUpdateRequested);
+    on<AuthPasswordChangeRequested>(_onPasswordChangeRequested);
   }
 
   Future<void> _onCheckStatus(
@@ -109,5 +111,59 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     await _authRepository.logout();
     emit(const AuthState(status: AuthStatus.unauthenticated));
+  }
+
+  Future<void> _onProfileUpdateRequested(
+    AuthProfileUpdateRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(status: AuthStatus.loading));
+    try {
+      final updatedUser = await _authRepository.updateProfile(
+        fullName: event.fullName,
+        phone: event.phone,
+        address: event.address,
+      );
+      emit(state.copyWith(
+        status: AuthStatus.profileUpdateSuccess,
+        user: updatedUser,
+      ));
+      // Revert status to authenticated
+      emit(state.copyWith(status: AuthStatus.authenticated));
+    } on Failure catch (e) {
+      emit(state.copyWith(status: AuthStatus.error, errorMessage: e.message));
+      emit(state.copyWith(status: AuthStatus.authenticated));
+    } catch (e) {
+      emit(state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: 'Đã có lỗi xảy ra khi cập nhật hồ sơ.',
+      ));
+      emit(state.copyWith(status: AuthStatus.authenticated));
+    }
+  }
+
+  Future<void> _onPasswordChangeRequested(
+    AuthPasswordChangeRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(status: AuthStatus.loading));
+    try {
+      await _authRepository.changePassword(
+        oldPassword: event.oldPassword,
+        newPassword: event.newPassword,
+      );
+      emit(state.copyWith(status: AuthStatus.passwordChangeSuccess));
+      // Revert status to authenticated
+      emit(state.copyWith(status: AuthStatus.authenticated));
+    } on Failure catch (e) {
+      emit(state.copyWith(status: AuthStatus.error, errorMessage: e.message));
+      emit(state.copyWith(status: AuthStatus.authenticated));
+    } catch (e) {
+      emit(state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: 'Đã có lỗi xảy ra khi đổi mật khẩu.',
+      ));
+      emit(state.copyWith(status: AuthStatus.authenticated));
+    }
   }
 }

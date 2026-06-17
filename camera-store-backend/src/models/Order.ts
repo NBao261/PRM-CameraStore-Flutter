@@ -5,6 +5,7 @@ export interface IOrderItem {
   name: string;
   price: number;
   quantity: number;
+  imageUrl: string;
 }
 
 export type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled';
@@ -38,6 +39,7 @@ const OrderSchema: Schema = new Schema(
         name:     { type: String, required: true },
         price:    { type: Number, required: true },
         quantity: { type: Number, required: true, min: 1 },
+        imageUrl: { type: String, required: true },
       },
     ],
     shippingInfo: {
