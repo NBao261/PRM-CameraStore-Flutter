@@ -1,32 +1,16 @@
 import http from 'http';
-import { Server as SocketIOServer } from 'socket.io';
+
 import app from './app';
 import connectDB from './config/db';
 import config from './config/env';
 import mongoose from 'mongoose';
 
+import { initSocket } from './socket';
+
 const server = http.createServer(app);
 
 // ── Socket.IO ───────────────────────────────────────
-const io = new SocketIOServer(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] },
-});
-
-io.on('connection', (socket) => {
-  console.log(`🟢 Socket connected: ${socket.id}`);
-
-  socket.on('join_conversation', (conversationId: string) => {
-    socket.join(conversationId);
-  });
-
-  socket.on('send_message', (data) => {
-    io.to(data.conversationId).emit('new_message', data);
-  });
-
-  socket.on('disconnect', () => {
-    console.log(`🔴 Socket disconnected: ${socket.id}`);
-  });
-});
+const io = initSocket(server);
 
 // ── Startup ─────────────────────────────────────────
 const startServer = async () => {

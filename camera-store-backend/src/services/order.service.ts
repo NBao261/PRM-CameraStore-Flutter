@@ -9,6 +9,7 @@ export class OrderService {
     data: {
       shippingInfo: { fullName: string; phone: string; address: string; note?: string };
       paymentMethod: 'cod' | 'bank_transfer' | 'e_wallet';
+      productIds?: string[];
     }
   ) {
     const cart = await Cart.findOne({ user: userId }).populate('items.product');
@@ -17,7 +18,17 @@ export class OrderService {
       throw new ValidationError('Giỏ hàng đang trống');
     }
 
-    const items = cart.items.map((item: any) => ({
+    let itemsToProcess = cart.items;
+    if (data.productIds && data.productIds.length > 0) {
+      itemsToProcess = cart.items.filter((item: any) =>
+        data.productIds!.includes(String(item.product._id))
+      );
+      if (itemsToProcess.length === 0) {
+        throw new ValidationError('Không tìm thấy sản phẩm được chọn trong giỏ hàng');
+      }
+    }
+
+    const items = itemsToProcess.map((item: any) => ({
       product: item.product._id,
       name: item.product.name,
       price: item.product.salePrice || item.product.price,
@@ -25,7 +36,7 @@ export class OrderService {
       imageUrl: item.product.images?.[0] || '',
     }));
 
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
     const shippingFee = 0;
     const total = subtotal + shippingFee;
 
@@ -41,19 +52,36 @@ export class OrderService {
       statusHistory: [{ status: 'pending', changedAt: new Date() }],
     });
 
-    // Clear cart after successful order
-    cart.items = [];
+    // Remove purchased items from cart
+    if (data.productIds && data.productIds.length > 0) {
+      cart.items = cart.items.filter((item: any) =>
+        !data.productIds!.includes(String(item.product._id))
+      );
+    } else {
+      cart.items = [];
+    }
     await cart.save();
 
+    const productName = items.length === 1
+      ? items[0].name
+      : `${items[0].name} và ${items.length - 1} sản phẩm khác`;
+
     // Create notification
-    await Notification.create({
+    const notification = await Notification.create({
       user: userId,
       title: 'Đơn hàng mới',
-      content: `Đơn hàng #${order._id} đã được tạo thành công`,
+      content: `Đơn hàng với sản phẩm ${productName} đã được tạo thành công`,
       type: 'order',
       relatedId: String(order._id),
       relatedType: 'order',
     });
+
+    try {
+      const { getIO } = await import('../socket');
+      getIO().to(`user_${userId}`).emit('new_notification', notification);
+    } catch (err) {
+      console.error('Socket emit error:', err);
+    }
 
     let payUrl: string | undefined;
 

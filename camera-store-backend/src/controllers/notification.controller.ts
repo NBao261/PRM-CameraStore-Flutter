@@ -30,3 +30,16 @@ export const markAsRead = async (req: IAuthRequest, res: Response, next: NextFun
     next(error);
   }
 };
+
+// PUT /api/notifications/read-all
+export const markAllAsRead = async (req: IAuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    await Notification.updateMany(
+      { user: req.user!.id, isRead: false },
+      { isRead: true }
+    );
+    ApiResponse.success(res, { message: 'Đã đánh dấu tất cả là đã đọc' });
+  } catch (error) {
+    next(error);
+  }
+};
