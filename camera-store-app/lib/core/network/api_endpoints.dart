@@ -6,6 +6,7 @@ class ApiEndpoints {
   static const String verifyOtp = '/auth/verify-otp';
   static const String login = '/auth/login';
   static const String profile = '/auth/profile';
+  static const String changePassword = '/auth/change-password';
 
   // Products
   static const String products = '/products';
@@ -21,6 +22,7 @@ class ApiEndpoints {
 
   // Notifications
   static const String notifications = '/notifications';
+  static const String readNotification = '/notifications/read';
 
   // Stores
   static const String stores = '/stores';
