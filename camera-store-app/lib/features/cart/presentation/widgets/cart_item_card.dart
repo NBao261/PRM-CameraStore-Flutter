@@ -9,6 +9,8 @@ class CartItemCard extends StatelessWidget {
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onRemove;
+  final bool isSelected;
+  final Function(bool?) onSelectionChanged;
 
   const CartItemCard({
     super.key,
@@ -16,6 +18,8 @@ class CartItemCard extends StatelessWidget {
     required this.onIncrement,
     required this.onDecrement,
     required this.onRemove,
+    required this.isSelected,
+    required this.onSelectionChanged,
   });
 
   String _formatPrice(double price) {
@@ -49,8 +53,17 @@ class CartItemCard extends StatelessWidget {
         ],
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // ── Checkbox ─────────────────────────────
+          Checkbox(
+            value: isSelected,
+            onChanged: onSelectionChanged,
+            activeColor: AppColors.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
           // ── Product Image ────────────────────────
           ClipRRect(
             borderRadius: BorderRadius.circular(14),

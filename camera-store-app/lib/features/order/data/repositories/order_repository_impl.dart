@@ -11,10 +11,12 @@ class OrderRepositoryImpl implements OrderRepository {
   Future<OrderEntity> createOrder({
     required ShippingInfo shippingInfo,
     required String paymentMethod,
+    List<String>? productIds,
   }) {
     return _remoteDataSource.createOrder(
       shippingInfo: shippingInfo,
       paymentMethod: paymentMethod,
+      productIds: productIds,
     );
   }
 

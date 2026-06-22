@@ -32,6 +32,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       final order = await orderRepository.createOrder(
         shippingInfo: event.shippingInfo,
         paymentMethod: event.paymentMethod,
+        productIds: event.productIds,
       );
       emit(state.copyWith(
         status: OrderBlocStatus.created,
