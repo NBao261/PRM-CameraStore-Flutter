@@ -11,6 +11,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     on<OrderCreateRequested>(_onOrderCreateRequested);
     on<OrdersLoadRequested>(_onOrdersLoadRequested);
     on<OrderDetailLoadRequested>(_onOrderDetailLoadRequested);
+    on<OrderCancelRequested>(_onOrderCancelRequested);
   }
 
   String _parseError(dynamic e) {
@@ -76,6 +77,28 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         status: OrderBlocStatus.loaded,
         currentOrder: order,
       ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: OrderBlocStatus.error,
+        errorMessage: _parseError(e),
+      ));
+    }
+  }
+
+  Future<void> _onOrderCancelRequested(
+    OrderCancelRequested event,
+    Emitter<OrderState> emit,
+  ) async {
+    emit(state.copyWith(status: OrderBlocStatus.loading));
+    try {
+      final order = await orderRepository.cancelOrder(event.orderId);
+      emit(state.copyWith(
+        status: OrderBlocStatus.loaded,
+        currentOrder: order,
+      ));
+      
+      // Reload orders list after cancellation to update the list
+      add(const OrdersLoadRequested());
     } catch (e) {
       emit(state.copyWith(
         status: OrderBlocStatus.error,

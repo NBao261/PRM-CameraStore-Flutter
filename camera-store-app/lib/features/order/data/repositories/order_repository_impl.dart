@@ -29,4 +29,9 @@ class OrderRepositoryImpl implements OrderRepository {
   Future<OrderEntity> getOrderById(String orderId) {
     return _remoteDataSource.getOrderById(orderId);
   }
+
+  @override
+  Future<OrderEntity> cancelOrder(String orderId) {
+    return _remoteDataSource.cancelOrder(orderId);
+  }
 }

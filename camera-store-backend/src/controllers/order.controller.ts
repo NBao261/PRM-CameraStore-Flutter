@@ -32,3 +32,13 @@ export const getOrderById = async (req: IAuthRequest, res: Response, next: NextF
     next(error);
   }
 };
+
+// PUT /api/orders/:id/cancel
+export const cancelOrder = async (req: IAuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await orderService.cancelOrder(req.user!.id, req.params.id as string);
+    ApiResponse.success(res, data, 'Huỷ đơn hàng thành công');
+  } catch (error) {
+    next(error);
+  }
+};
