@@ -27,6 +27,11 @@ import 'features/notification/presentation/bloc/notification_event.dart';
 import 'features/chat/data/datasources/chat_remote_datasource.dart';
 import 'features/chat/data/repositories/chat_repository_impl.dart';
 import 'features/chat/presentation/bloc/chat_bloc.dart';
+import 'features/admin/data/datasources/admin_remote_datasource.dart';
+import 'features/admin/data/repositories/admin_repository.dart';
+import 'features/admin/presentation/bloc/admin_order_bloc.dart';
+import 'features/admin/presentation/bloc/admin_chat_bloc.dart';
+import 'features/admin/presentation/screens/admin_main_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,6 +61,9 @@ class CameraStoreApp extends StatelessWidget {
     final chatRemoteDataSource = ChatRemoteDataSource(apiClient);
     final chatRepository = ChatRepositoryImpl(chatRemoteDataSource);
 
+    final adminDataSource = AdminRemoteDataSource(apiClient);
+    final adminRepository = AdminRepository(adminDataSource);
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -75,6 +83,12 @@ class CameraStoreApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => ChatBloc(chatRepository),
+        ),
+        BlocProvider(
+          create: (_) => AdminOrderBloc(adminRepository),
+        ),
+        BlocProvider(
+          create: (_) => AdminChatBloc(adminRepository),
         ),
       ],
       child: MaterialApp(
@@ -101,6 +115,10 @@ class CameraStoreApp extends StatelessWidget {
               }
 
               if (state.user != null) {
+                // Role-based routing
+                if (state.user!.role == 'admin') {
+                  return const AdminMainScreen();
+                }
                 return const MainScreen();
               }
 

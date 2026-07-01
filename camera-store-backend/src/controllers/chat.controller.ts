@@ -29,6 +29,7 @@ export const sendMessage = async (req: IAuthRequest, res: Response, next: NextFu
     try {
       const io = getIO();
       io.to(conversationId).emit('new_message', populated);
+      io.to('admin_room').emit('new_message', populated);
     } catch (_) {
       // Socket not initialized — still return success from REST
     }

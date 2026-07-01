@@ -18,6 +18,12 @@ export const initSocket = (server: Server) => {
       console.log(`User ${userId} joined room user_${userId}`);
     });
 
+    // Join admin room
+    socket.on('join_admin', () => {
+      socket.join('admin_room');
+      console.log(`Socket ${socket.id} joined admin_room`);
+    });
+
     // Chat rooms
     socket.on('join_conversation', (conversationId: string) => {
       socket.join(conversationId);

@@ -28,3 +28,5 @@ class ChatNewMessageReceived extends ChatEvent {
   @override
   List<Object?> get props => [messageData];
 }
+
+class ChatMarkAsRead extends ChatEvent {}
