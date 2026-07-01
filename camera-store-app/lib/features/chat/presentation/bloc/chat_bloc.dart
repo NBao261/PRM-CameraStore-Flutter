@@ -16,6 +16,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<ChatLoadHistory>(_onLoadHistory);
     on<ChatSendMessage>(_onSendMessage);
     on<ChatNewMessageReceived>(_onNewMessageReceived);
+    on<ChatMarkAsRead>((event, emit) {
+      emit(state.copyWith(unreadCount: 0));
+    });
 
     // Listen to real-time chat messages from socket
     _chatSubscription = SocketService().chatMessageStream.listen((data) {
@@ -84,13 +87,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ) {
     try {
       final newMessage = ChatMessageModel.fromJson(event.messageData);
+      
+      int newUnreadCount = state.unreadCount;
+      if (newMessage.senderRole != 'user') {
+        newUnreadCount += 1;
+      }
 
       // Avoid duplicates
       final exists = state.messages.any((m) => m.id == newMessage.id);
       if (!exists) {
         emit(state.copyWith(
+          unreadCount: newUnreadCount,
           messages: [...state.messages, newMessage],
         ));
+      } else {
+        emit(state.copyWith(unreadCount: newUnreadCount));
       }
     } catch (_) {
       // Ignore malformed socket data

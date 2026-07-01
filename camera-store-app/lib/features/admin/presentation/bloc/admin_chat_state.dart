@@ -8,6 +8,7 @@ class AdminChatState extends Equatable {
   final List<Map<String, dynamic>> messages;
   final String? currentConversationId;
   final String? errorMessage;
+  final int unreadCount;
 
   const AdminChatState({
     this.status = AdminChatStatus.initial,
@@ -15,6 +16,7 @@ class AdminChatState extends Equatable {
     this.messages = const [],
     this.currentConversationId,
     this.errorMessage,
+    this.unreadCount = 0,
   });
 
   AdminChatState copyWith({
@@ -23,6 +25,7 @@ class AdminChatState extends Equatable {
     List<Map<String, dynamic>>? messages,
     String? currentConversationId,
     String? errorMessage,
+    int? unreadCount,
   }) {
     return AdminChatState(
       status: status ?? this.status,
@@ -30,9 +33,17 @@ class AdminChatState extends Equatable {
       messages: messages ?? this.messages,
       currentConversationId: currentConversationId ?? this.currentConversationId,
       errorMessage: errorMessage,
+      unreadCount: unreadCount ?? this.unreadCount,
     );
   }
 
   @override
-  List<Object?> get props => [status, conversations, messages, currentConversationId, errorMessage];
+  List<Object?> get props => [
+        status,
+        conversations,
+        messages,
+        currentConversationId,
+        errorMessage,
+        unreadCount,
+      ];
 }

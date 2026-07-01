@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/network/socket_service.dart';
+import '../bloc/admin_chat_bloc.dart';
+import '../bloc/admin_chat_event.dart';
+import '../bloc/admin_chat_state.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_order_list_screen.dart';
 import 'admin_chat_list_screen.dart';
@@ -21,6 +26,13 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Socket is already connected via main app, just join admin room
+    SocketService().joinAdminRoom();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
@@ -39,7 +51,12 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
+          onTap: (index) {
+            setState(() => _currentIndex = index);
+            if (index == 2) {
+              context.read<AdminChatBloc>().add(AdminChatMarkAsRead());
+            }
+          },
           selectedItemColor: AppColors.primary,
           unselectedItemColor: AppColors.textHint,
           showUnselectedLabels: true,
@@ -48,20 +65,28 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
           elevation: 0,
           selectedFontSize: 12,
           unselectedFontSize: 12,
-          items: const [
-            BottomNavigationBarItem(
+          items: [
+            const BottomNavigationBarItem(
               icon: Icon(Icons.dashboard_outlined),
               activeIcon: Icon(Icons.dashboard),
               label: 'Dashboard',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.receipt_long_outlined),
               activeIcon: Icon(Icons.receipt_long),
               label: 'Đơn hàng',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_outlined),
-              activeIcon: Icon(Icons.chat),
+              icon: BlocBuilder<AdminChatBloc, AdminChatState>(
+                builder: (context, state) {
+                  return Badge(
+                    isLabelVisible: state.unreadCount > 0,
+                    label: Text(state.unreadCount.toString()),
+                    child: const Icon(Icons.chat_outlined),
+                  );
+                },
+              ),
+              activeIcon: const Icon(Icons.chat),
               label: 'Chat',
             ),
           ],

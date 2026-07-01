@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/network/socket_service.dart';
 import '../../data/repositories/admin_repository.dart';
 import 'admin_chat_event.dart';
 import 'admin_chat_state.dart';
@@ -6,10 +8,26 @@ import 'admin_chat_state.dart';
 class AdminChatBloc extends Bloc<AdminChatEvent, AdminChatState> {
   final AdminRepository _repository;
 
+  StreamSubscription? _chatSubscription;
+
   AdminChatBloc(this._repository) : super(const AdminChatState()) {
     on<AdminChatLoadConversations>(_onLoadConversations);
     on<AdminChatLoadMessages>(_onLoadMessages);
     on<AdminChatSendMessage>(_onSendMessage);
+    on<AdminChatNewMessageReceived>(_onNewMessageReceived);
+    on<AdminChatMarkAsRead>((event, emit) {
+      emit(state.copyWith(unreadCount: 0));
+    });
+
+    _chatSubscription = SocketService().chatMessageStream.listen((data) {
+      add(AdminChatNewMessageReceived(messageData: data));
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _chatSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onLoadConversations(
@@ -81,5 +99,37 @@ class AdminChatBloc extends Bloc<AdminChatEvent, AdminChatState> {
         errorMessage: 'Không thể gửi tin nhắn',
       ));
     }
+  }
+
+  void _onNewMessageReceived(
+    AdminChatNewMessageReceived event,
+    Emitter<AdminChatState> emit,
+  ) {
+    try {
+      final message = event.messageData;
+      
+      // Update unread count if it's from a user
+      int newUnreadCount = state.unreadCount;
+      if (message['senderRole'] == 'user') {
+        newUnreadCount += 1;
+      }
+
+      // If it belongs to current conversation, add it to messages
+      List<Map<String, dynamic>> newMessages = state.messages;
+      if (state.currentConversationId != null &&
+          message['conversationId'] == state.currentConversationId) {
+        final exists = newMessages.any((m) => m['_id'] == message['_id']);
+        if (!exists) {
+          newMessages = List.from(newMessages)..add(message);
+        }
+      }
+
+      // In a real app we'd also update the conversation list to bring it to top
+
+      emit(state.copyWith(
+        unreadCount: newUnreadCount,
+        messages: newMessages,
+      ));
+    } catch (_) {}
   }
 }

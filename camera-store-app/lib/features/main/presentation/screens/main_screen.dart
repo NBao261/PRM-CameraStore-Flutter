@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../product/presentation/screens/product_list_screen.dart';
 import '../../../chat/presentation/screens/chat_screen.dart';
 import '../../../store/presentation/screens/store_map_screen.dart';
 import '../../../order/presentation/screens/order_history_screen.dart';
 import '../../../profile/presentation/screens/user_profile_screen.dart';
+import '../../../chat/presentation/bloc/chat_bloc.dart';
+import '../../../chat/presentation/bloc/chat_event.dart';
+import '../../../chat/presentation/bloc/chat_state.dart';
+import '../../../notification/presentation/bloc/notification_bloc.dart';
+import '../../../notification/presentation/bloc/notification_state.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -47,6 +53,9 @@ class _MainScreenState extends State<MainScreen> {
             setState(() {
               _currentIndex = index;
             });
+            if (index == 1) {
+              context.read<ChatBloc>().add(ChatMarkAsRead());
+            }
           },
           selectedItemColor: AppColors.primary,
           unselectedItemColor: AppColors.textHint,
@@ -56,28 +65,45 @@ class _MainScreenState extends State<MainScreen> {
           elevation: 0,
           selectedFontSize: 12,
           unselectedFontSize: 12,
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
+              icon: BlocBuilder<NotificationBloc, NotificationState>(
+                builder: (context, state) {
+                  final unreadCount = state.notifications.where((n) => !n.isRead).length;
+                  return Badge(
+                    isLabelVisible: unreadCount > 0,
+                    label: Text(unreadCount.toString()),
+                    child: const Icon(Icons.home_outlined),
+                  );
+                },
+              ),
+              activeIcon: const Icon(Icons.home),
               label: 'Trang chủ',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              activeIcon: Icon(Icons.chat_bubble),
+              icon: BlocBuilder<ChatBloc, ChatState>(
+                builder: (context, state) {
+                  return Badge(
+                    isLabelVisible: state.unreadCount > 0,
+                    label: Text(state.unreadCount.toString()),
+                    child: const Icon(Icons.chat_bubble_outline),
+                  );
+                },
+              ),
+              activeIcon: const Icon(Icons.chat_bubble),
               label: 'Chat',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.map_outlined),
               activeIcon: Icon(Icons.map),
               label: 'Bản đồ',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.receipt_long_outlined),
               activeIcon: Icon(Icons.receipt_long),
               label: 'Đơn hàng',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               activeIcon: Icon(Icons.person),
               label: 'Hồ sơ',

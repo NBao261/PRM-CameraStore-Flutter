@@ -63,6 +63,10 @@ class SocketService {
     _socket?.emit('join_conversation', conversationId);
   }
 
+  void joinAdminRoom() {
+    _socket?.emit('join_admin');
+  }
+
   void sendChatMessage({
     required String content,
     required String conversationId,

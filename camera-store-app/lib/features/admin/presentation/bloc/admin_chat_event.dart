@@ -27,3 +27,14 @@ class AdminChatSendMessage extends AdminChatEvent {
   @override
   List<Object?> get props => [conversationId, content];
 }
+
+class AdminChatNewMessageReceived extends AdminChatEvent {
+  final Map<String, dynamic> messageData;
+
+  const AdminChatNewMessageReceived({required this.messageData});
+
+  @override
+  List<Object?> get props => [messageData];
+}
+
+class AdminChatMarkAsRead extends AdminChatEvent {}
