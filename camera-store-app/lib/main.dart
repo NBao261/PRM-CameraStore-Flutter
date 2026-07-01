@@ -20,10 +20,13 @@ import 'features/cart/presentation/bloc/cart_event.dart';
 import 'features/order/data/datasources/order_remote_datasource.dart';
 import 'features/order/data/repositories/order_repository_impl.dart';
 import 'features/order/presentation/bloc/order_bloc.dart';
-import 'features/product/presentation/screens/product_list_screen.dart';
+import 'features/main/presentation/screens/main_screen.dart';
 import 'features/notification/data/repositories/notification_repository_impl.dart';
 import 'features/notification/presentation/bloc/notification_bloc.dart';
 import 'features/notification/presentation/bloc/notification_event.dart';
+import 'features/chat/data/datasources/chat_remote_datasource.dart';
+import 'features/chat/data/repositories/chat_repository_impl.dart';
+import 'features/chat/presentation/bloc/chat_bloc.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +53,9 @@ class CameraStoreApp extends StatelessWidget {
 
     final notificationRepository = NotificationRepositoryImpl(apiClient);
 
+    final chatRemoteDataSource = ChatRemoteDataSource(apiClient);
+    final chatRepository = ChatRepositoryImpl(chatRemoteDataSource);
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -66,6 +72,9 @@ class CameraStoreApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => NotificationBloc(notificationRepository),
+        ),
+        BlocProvider(
+          create: (_) => ChatBloc(chatRepository),
         ),
       ],
       child: MaterialApp(
@@ -91,8 +100,8 @@ class CameraStoreApp extends StatelessWidget {
                 );
               }
 
-              if (state.status == AuthStatus.authenticated) {
-                return const ProductListScreen();
+              if (state.user != null) {
+                return const MainScreen();
               }
 
               return const LoginScreen();

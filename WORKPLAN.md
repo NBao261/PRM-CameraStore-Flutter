@@ -82,7 +82,7 @@ _Tương ứng với Phase 8_
 
 ---
 
-## Tuần 6: Hồ sơ Người dùng & Thông báo
+## Tuần 6: Hồ sơ Người dùng & Thông báo [x]
 
 _Tương ứng với Phase 9, Phase 12_
 
@@ -97,7 +97,7 @@ _Tương ứng với Phase 9, Phase 12_
 
 ---
 
-## Tuần 7: Hỗ trợ trực tuyến (Real-time Chat)
+## Tuần 7: Hỗ trợ trực tuyến (Real-time Chat) [x]
 
 _Tương ứng với Phase 11_
 
@@ -112,7 +112,7 @@ _Tương ứng với Phase 11_
 
 ---
 
-## Tuần 8: Bản đồ Cửa hàng & Cải thiện UI/UX (Polish)
+## Tuần 8: Bản đồ Cửa hàng & Cải thiện UI/UX (Polish) [X]
 
 _Tương ứng với Phase 10_
 
