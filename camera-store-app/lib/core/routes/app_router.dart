@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../features/main/presentation/screens/main_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/verify_otp_screen.dart';
@@ -13,6 +14,8 @@ import '../../features/order/presentation/screens/order_detail_screen.dart';
 import '../../features/order/domain/entities/order_entity.dart';
 import '../../features/profile/presentation/screens/user_profile_screen.dart';
 import '../../features/profile/presentation/screens/change_password_screen.dart';
+import '../../features/chat/presentation/screens/chat_screen.dart';
+import '../../features/store/presentation/screens/store_map_screen.dart';
 
 class AppRouter {
   static const String login = '/login';
@@ -27,6 +30,8 @@ class AppRouter {
   static const String orderDetail = '/order-detail';
   static const String profile = '/profile';
   static const String changePassword = '/change-password';
+  static const String chat = '/chat';
+  static const String storeMap = '/store-map';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -38,7 +43,7 @@ class AppRouter {
         final email = settings.arguments as String;
         return MaterialPageRoute(builder: (_) => VerifyOtpScreen(email: email));
       case home:
-        return MaterialPageRoute(builder: (_) => const ProductListScreen());
+        return MaterialPageRoute(builder: (_) => const MainScreen());
       case productDetail:
         final productId = settings.arguments as String;
         return MaterialPageRoute(
@@ -69,6 +74,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const UserProfileScreen());
       case changePassword:
         return MaterialPageRoute(builder: (_) => const ChangePasswordScreen());
+      case chat:
+        return MaterialPageRoute(builder: (_) => const ChatScreen());
+      case storeMap:
+        return MaterialPageRoute(builder: (_) => const StoreMapScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

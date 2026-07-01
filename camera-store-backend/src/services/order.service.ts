@@ -118,6 +118,41 @@ export class OrderService {
     }
     return order;
   }
+
+  async cancelOrder(userId: string, orderId: string) {
+    const order = await Order.findOne({ _id: orderId, user: userId });
+
+    if (!order) {
+      throw new NotFoundError('Không tìm thấy đơn hàng');
+    }
+
+    if (order.status !== 'pending') {
+      throw new ValidationError('Chỉ có thể huỷ đơn hàng khi đang ở trạng thái chờ xác nhận');
+    }
+
+    order.status = 'cancelled';
+    order.statusHistory.push({ status: 'cancelled', changedAt: new Date() });
+    await order.save();
+
+    // Create notification
+    const notification = await Notification.create({
+      user: userId,
+      title: 'Đã huỷ đơn hàng',
+      content: `Đơn hàng #${order._id.toString().substring(0, 8)} đã được huỷ thành công.`,
+      type: 'order',
+      relatedId: String(order._id),
+      relatedType: 'order',
+    });
+
+    try {
+      const { getIO } = await import('../socket');
+      getIO().to(`user_${userId}`).emit('new_notification', notification);
+    } catch (err) {
+      console.error('Socket emit error:', err);
+    }
+
+    return order;
+  }
 }
 
 export const orderService = new OrderService();

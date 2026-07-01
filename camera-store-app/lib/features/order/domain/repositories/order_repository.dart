@@ -13,4 +13,7 @@ abstract class OrderRepository {
 
   /// Get a single order by ID
   Future<OrderEntity> getOrderById(String orderId);
+
+  /// Cancel an order
+  Future<OrderEntity> cancelOrder(String orderId);
 }

@@ -42,6 +42,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: const Text(
             'Đơn đã mua',
             style: TextStyle(

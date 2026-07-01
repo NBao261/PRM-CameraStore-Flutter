@@ -133,7 +133,39 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ),
         ),
       ),
-      body: BlocBuilder<OrderBloc, OrderState>(
+      body: BlocConsumer<OrderBloc, OrderState>(
+        listenWhen: (previous, current) {
+          // Listen for transition from loading to loaded if we were cancelling
+          if (previous.status == OrderBlocStatus.loading &&
+              current.status == OrderBlocStatus.loaded &&
+              current.currentOrder?.status == OrderStatus.cancelled) {
+            return true;
+          }
+          // Listen for errors
+          if (previous.status == OrderBlocStatus.loading &&
+              current.status == OrderBlocStatus.error) {
+            return true;
+          }
+          return false;
+        },
+        listener: (context, state) {
+          if (state.status == OrderBlocStatus.loaded &&
+              state.currentOrder?.status == OrderStatus.cancelled) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Hủy đơn hàng thành công'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+          } else if (state.status == OrderBlocStatus.error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage ?? 'Có lỗi xảy ra'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        },
         builder: (context, state) {
           if (state.status == OrderBlocStatus.loading ||
               state.currentOrder == null) {
@@ -488,6 +520,57 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ],
                     ),
                   ),
+                  if (order.status == OrderStatus.pending) ...[
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext dialogContext) {
+                              return AlertDialog(
+                                title: const Text('Hủy đơn hàng'),
+                                content: const Text('Bạn có chắc chắn muốn hủy đơn hàng này không? Hành động này không thể hoàn tác.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(dialogContext).pop(),
+                                    child: const Text('Không'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(dialogContext).pop();
+                                      context.read<OrderBloc>().add(OrderCancelRequested(order.id));
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.error,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: const Text('Có, hủy đơn'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.error,
+                          side: const BorderSide(color: AppColors.error),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Hủy đơn hàng',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

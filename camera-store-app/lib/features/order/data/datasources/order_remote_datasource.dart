@@ -59,4 +59,9 @@ class OrderRemoteDataSource {
     final response = await apiClient.dio.get('/orders/$orderId');
     return OrderModel.fromJson(_extractData(response.data));
   }
+
+  Future<OrderEntity> cancelOrder(String orderId) async {
+    final response = await apiClient.dio.put('/orders/$orderId/cancel');
+    return OrderModel.fromJson(_extractData(response.data));
+  }
 }

@@ -77,6 +77,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: const Text(
             'Hồ sơ của tôi',
             style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: Colors.white),
@@ -209,6 +210,29 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Logout
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          context.read<AuthBloc>().add(AuthLogoutRequested());
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          'Đăng xuất',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),

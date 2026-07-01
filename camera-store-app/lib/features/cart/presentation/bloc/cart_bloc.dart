@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/cart_repository.dart';
+import '../../domain/entities/cart_entity.dart';
 import 'cart_event.dart';
 import 'cart_state.dart';
 
@@ -94,7 +95,27 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartItemRemoved event,
     Emitter<CartState> emit,
   ) async {
-    emit(state.copyWith(updatingProductId: event.productId));
+    // Optimistic update to immediately remove item from UI and prevent Dismissible error
+    final currentCart = state.cart;
+    if (currentCart != null) {
+      final newItems = currentCart.items.where((e) => e.product.id != event.productId).toList();
+      final optimisticCart = CartEntity(
+        id: currentCart.id,
+        userId: currentCart.userId,
+        items: newItems,
+        updatedAt: currentCart.updatedAt,
+      );
+      final newSelected = Set<String>.from(state.selectedItemIds)..remove(event.productId);
+      
+      emit(state.copyWith(
+        cart: optimisticCart,
+        selectedItemIds: newSelected,
+        updatingProductId: event.productId,
+      ));
+    } else {
+      emit(state.copyWith(updatingProductId: event.productId));
+    }
+
     try {
       final cart = await cartRepository.removeFromCart(event.productId);
       final newSelected = Set<String>.from(state.selectedItemIds)..remove(event.productId);
@@ -110,6 +131,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         errorMessage: _parseError(e),
         clearUpdating: true,
       ));
+      // Reload cart to get true state if delete failed
+      add(const CartLoadRequested());
     }
   }
 

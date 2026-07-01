@@ -270,7 +270,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ],
               ),
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 100), // Extra bottom padding for glassmorphism
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 200), // Extra bottom padding for glassmorphism bottom bar
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -391,7 +391,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       height: 1.7,
                     ),
                   ),
-                  const SizedBox(height: 60), // extra padding for scrolling
                 ],
               ),
             ),
