@@ -16,6 +16,8 @@ import notificationRoutes from './routes/notification.routes';
 import storeRoutes from './routes/store.routes';
 import chatRoutes from './routes/chat.routes';
 import paymentRoutes from './routes/payment.routes';
+import adminOrderRoutes from './routes/admin.order.routes';
+import adminChatRoutes from './routes/admin.chat.routes';
 
 const app = express();
 
@@ -55,6 +57,8 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/stores', storeRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/admin/orders', adminOrderRoutes);
+app.use('/api/admin/chat', adminChatRoutes);
 
 // ── Global error handler (must be last) ─────────────
 app.use(errorHandler);
