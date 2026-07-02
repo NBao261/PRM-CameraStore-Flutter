@@ -18,8 +18,7 @@ dependencies:
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
 
-  # Routing
-  go_router: ^14.2.0
+  # Routing (via AppRouter + onGenerateRoute)
 
   # Secure Storage (JWT token)
   flutter_secure_storage: ^9.2.2
@@ -38,6 +37,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true
