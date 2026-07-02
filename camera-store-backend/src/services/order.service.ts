@@ -29,7 +29,7 @@ export class OrderService {
       }
     }
 
-    for (const item of itemsToProcess) {
+    for (const item of itemsToProcess as any[]) {
       if (item.product.stock < item.quantity) {
         throw new ValidationError(`Sản phẩm ${item.product.name} không đủ số lượng (còn ${item.product.stock})`);
       }
