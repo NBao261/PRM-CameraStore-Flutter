@@ -5,17 +5,40 @@ import '../../domain/entities/chat_message_entity.dart';
 class ChatBubble extends StatelessWidget {
   final ChatMessageEntity message;
   final bool isMine;
+  final String? myAvatarUrl;
 
   const ChatBubble({
     super.key,
     required this.message,
     required this.isMine,
+    this.myAvatarUrl,
   });
 
   String _formatTime(DateTime dateTime) {
     final hour = dateTime.hour.toString().padLeft(2, '0');
     final minute = dateTime.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+
+  Widget _buildUserAvatar() {
+    if (myAvatarUrl != null && myAvatarUrl!.isNotEmpty) {
+      return CircleAvatar(
+        radius: 16,
+        backgroundImage: NetworkImage(myAvatarUrl!),
+        onBackgroundImageError: (_, __) {},
+        backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+        child: null,
+      );
+    }
+    return CircleAvatar(
+      radius: 16,
+      backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+      child: const Icon(
+        Icons.person,
+        size: 18,
+        color: AppColors.primary,
+      ),
+    );
   }
 
   @override
@@ -41,10 +64,10 @@ class ChatBubble extends StatelessWidget {
           Row(
             mainAxisAlignment:
                 isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start, // Align top of bubble
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (!isMine) ...[
-                // Support avatar
+                // Admin avatar (left side)
                 CircleAvatar(
                   radius: 16,
                   backgroundColor: AppColors.info.withValues(alpha: 0.15),
@@ -63,7 +86,7 @@ class ChatBubble extends StatelessWidget {
                   children: [
                     Container(
                       constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.72,
+                        maxWidth: MediaQuery.of(context).size.width * 0.65,
                       ),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 10),
@@ -72,7 +95,7 @@ class ChatBubble extends StatelessWidget {
                             ? const LinearGradient(
                                 colors: [
                                   AppColors.primary,
-                                  AppColors.primaryLight
+                                  AppColors.primaryLight,
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
@@ -109,6 +132,11 @@ class ChatBubble extends StatelessWidget {
                   ],
                 ),
               ),
+              if (isMine) ...[
+                // User avatar (right side)
+                const SizedBox(width: 8),
+                _buildUserAvatar(),
+              ],
             ],
           ),
         ],
