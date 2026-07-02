@@ -370,7 +370,7 @@ class _OrderCard extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              order.items.isNotEmpty ? order.items.first.name : 'Đơn hàng #$shortId',
+                              'Đơn hàng #$shortId',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
