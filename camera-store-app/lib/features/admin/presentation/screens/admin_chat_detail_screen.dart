@@ -186,69 +186,129 @@ class _AdminChatDetailScreenState extends State<AdminChatDetailScreen> {
     final sender = msg['sender'] as Map?;
     final content = msg['content'] as String? ?? '';
     final time = _formatTime(msg['createdAt'] as String?);
+    final senderName = sender?['fullName'] as String? ?? widget.userName;
+    final senderAvatar = sender?['avatar'] as String?;
+    final initial = senderName.isNotEmpty ? senderName[0].toUpperCase() : '?';
 
-    return Align(
-      alignment: isAdmin ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
-        ),
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: isAdmin ? AppColors.primary : Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft:
-                isAdmin ? const Radius.circular(16) : const Radius.circular(4),
-            bottomRight:
-                isAdmin ? const Radius.circular(4) : const Radius.circular(16),
+    Widget userAvatar() {
+      if (senderAvatar != null && senderAvatar.isNotEmpty) {
+        return CircleAvatar(
+          radius: 16,
+          backgroundImage: NetworkImage(senderAvatar),
+          onBackgroundImageError: (_, __) {},
+          backgroundColor: AppColors.info.withValues(alpha: 0.15),
+        );
+      }
+      return CircleAvatar(
+        radius: 16,
+        backgroundColor: AppColors.info.withValues(alpha: 0.15),
+        child: Text(
+          initial,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: AppColors.info,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
-        child: Column(
-          crossAxisAlignment:
-              isAdmin ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            if (!isAdmin && sender != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  sender['fullName'] as String? ?? '',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.info.withValues(alpha: 0.7),
-                  ),
+      );
+    }
+
+    Widget adminAvatar() {
+      return CircleAvatar(
+        radius: 16,
+        backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+        child: const Icon(
+          Icons.support_agent,
+          size: 18,
+          color: AppColors.primary,
+        ),
+      );
+    }
+
+    final bubble = Container(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.65,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isAdmin ? AppColors.primary : Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: const Radius.circular(16),
+          topRight: const Radius.circular(16),
+          bottomLeft: isAdmin ? const Radius.circular(16) : const Radius.circular(4),
+          bottomRight: isAdmin ? const Radius.circular(4) : const Radius.circular(16),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment:
+            isAdmin ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 15,
+              color: isAdmin ? Colors.white : AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            time,
+            style: TextStyle(
+              fontSize: 10,
+              color: isAdmin ? Colors.white60 : AppColors.textHint,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      child: Column(
+        crossAxisAlignment:
+            isAdmin ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          if (!isAdmin)
+            Padding(
+              padding: const EdgeInsets.only(left: 40, bottom: 4),
+              child: Text(
+                senderName,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.info,
                 ),
               ),
-            Text(
-              content,
-              style: TextStyle(
-                fontSize: 15,
-                color: isAdmin ? Colors.white : AppColors.textPrimary,
-              ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              time,
-              style: TextStyle(
-                fontSize: 10,
-                color: isAdmin ? Colors.white60 : AppColors.textHint,
-              ),
-            ),
-          ],
-        ),
+          Row(
+            mainAxisAlignment:
+                isAdmin ? MainAxisAlignment.end : MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (!isAdmin) ...[
+                userAvatar(),
+                const SizedBox(width: 8),
+              ],
+              bubble,
+              if (isAdmin) ...[
+                const SizedBox(width: 8),
+                adminAvatar(),
+              ],
+            ],
+          ),
+        ],
       ),
     );
   }
+
+
 
   Widget _buildInputBar() {
     return Container(

@@ -401,6 +401,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     padding: EdgeInsets.zero,
                     child: ListView.separated(
                       shrinkWrap: true,
+                      padding: EdgeInsets.zero,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: order.items.length,
                       separatorBuilder: (context, index) => const Divider(

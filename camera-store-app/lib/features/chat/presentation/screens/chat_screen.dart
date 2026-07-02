@@ -64,8 +64,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUserId =
-        context.read<AuthBloc>().state.user?.id ?? '';
+    final currentUser = context.read<AuthBloc>().state.user;
+    final currentUserId = currentUser?.id ?? '';
+    final currentUserAvatar = currentUser?.avatar;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -239,6 +240,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ChatBubble(
                           message: message,
                           isMine: isMine,
+                          myAvatarUrl: isMine ? currentUserAvatar : null,
                         ),
                       ],
                     );

@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import Order from '../models/Order';
 import User from '../models/User';
 import Notification from '../models/Notification';
+import Product from '../models/Product';
 import { ApiResponse } from '../utils/response';
 import { NotFoundError, ValidationError } from '../utils/errors';
 import { IAuthRequest } from '../types';
@@ -63,6 +64,16 @@ export const updateOrderStatus = async (req: IAuthRequest, res: Response, next: 
     // Auto-update payment status
     if (status === 'delivered' && order.paymentMethod === 'cod') {
       order.paymentStatus = 'paid';
+    }
+
+    // Restore stock if cancelled
+    if (status === 'cancelled') {
+      for (const item of order.items) {
+        await Product.updateOne(
+          { _id: item.product },
+          { $inc: { stock: item.quantity } }
+        );
+      }
     }
 
     await order.save();

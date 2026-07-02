@@ -29,8 +29,8 @@ export const handleMoMoIPN = async (req: Request, res: Response): Promise<void> 
       if (order.paymentStatus !== 'paid') {
         order.paymentStatus = 'paid';
         // Optionally update the overall order status to confirmed
-        order.status = 'confirmed';
-        order.statusHistory.push({ status: 'confirmed', changedAt: new Date() });
+        // REMOVED: order.status = 'confirmed';
+        // REMOVED: order.statusHistory.push({ status: 'confirmed', changedAt: new Date() });
         await order.save();
       }
     } else {
@@ -75,8 +75,8 @@ export const handleMoMoCallback = async (req: Request, res: Response): Promise<v
       // Payment success
       if (order.paymentStatus !== 'paid') {
         order.paymentStatus = 'paid';
-        order.status = 'confirmed';
-        order.statusHistory.push({ status: 'confirmed', changedAt: new Date() });
+        // REMOVED: order.status = 'confirmed';
+        // REMOVED: order.statusHistory.push({ status: 'confirmed', changedAt: new Date() });
         await order.save();
       }
     } else {
