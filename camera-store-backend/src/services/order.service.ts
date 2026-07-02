@@ -1,6 +1,7 @@
 import Order from '../models/Order';
 import Cart from '../models/Cart';
 import Notification from '../models/Notification';
+import Product from '../models/Product';
 import { NotFoundError, ValidationError } from '../utils/errors';
 
 export class OrderService {
@@ -28,6 +29,12 @@ export class OrderService {
       }
     }
 
+    for (const item of itemsToProcess) {
+      if (item.product.stock < item.quantity) {
+        throw new ValidationError(`Sản phẩm ${item.product.name} không đủ số lượng (còn ${item.product.stock})`);
+      }
+    }
+
     const items = itemsToProcess.map((item: any) => ({
       product: item.product._id,
       name: item.product.name,
@@ -35,6 +42,13 @@ export class OrderService {
       quantity: item.quantity,
       imageUrl: item.product.images?.[0] || '',
     }));
+
+    for (const item of items) {
+      await Product.updateOne(
+        { _id: item.product },
+        { $inc: { stock: -item.quantity } }
+      );
+    }
 
     const subtotal = items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
     const shippingFee = 0;
@@ -133,6 +147,13 @@ export class OrderService {
     order.status = 'cancelled';
     order.statusHistory.push({ status: 'cancelled', changedAt: new Date() });
     await order.save();
+
+    for (const item of order.items) {
+      await Product.updateOne(
+        { _id: item.product },
+        { $inc: { stock: item.quantity } }
+      );
+    }
 
     // Create notification
     const notification = await Notification.create({
