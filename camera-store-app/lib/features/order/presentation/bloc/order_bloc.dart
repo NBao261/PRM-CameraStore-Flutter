@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/order_entity.dart';
 import '../../domain/repositories/order_repository.dart';
 import 'order_event.dart';
 import 'order_state.dart';
@@ -35,9 +36,11 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         paymentMethod: event.paymentMethod,
         productIds: event.productIds,
       );
+      final updatedOrders = List<OrderEntity>.from(state.orders)..insert(0, order);
       emit(state.copyWith(
         status: OrderBlocStatus.created,
         createdOrder: order,
+        orders: updatedOrders,
       ));
     } catch (e) {
       emit(state.copyWith(
