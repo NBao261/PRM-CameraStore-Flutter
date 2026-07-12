@@ -20,18 +20,46 @@ class OrderDetailScreen extends StatefulWidget {
 }
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
+  /// Set of product IDs that user has already reviewed for this order
+  final Set<String> _reviewedProducts = {};
+  /// Map productId → rating the user gave
+  final Map<String, int> _reviewRatings = {};
+
   @override
   void initState() {
     super.initState();
     context
         .read<OrderBloc>()
         .add(OrderDetailLoadRequested(widget.orderId));
+    _loadExistingReviews();
+  }
+
+  Future<void> _loadExistingReviews() async {
+    try {
+      final apiClient = ApiClient();
+      final response = await apiClient.dio.get('/reviews/order/${widget.orderId}');
+      final data = response.data['data'] as List? ?? [];
+      if (mounted) {
+        setState(() {
+          for (final r in data) {
+            final pid = r['product'] as String? ?? '';
+            if (pid.isNotEmpty) {
+              _reviewedProducts.add(pid);
+              _reviewRatings[pid] = (r['rating'] as num?)?.toInt() ?? 5;
+            }
+          }
+        });
+      }
+    } catch (_) {
+      // silently ignore — button stays active as fallback
+    }
   }
 
   Future<void> _onRefresh() async {
     context
         .read<OrderBloc>()
         .add(OrderDetailLoadRequested(widget.orderId));
+    _loadExistingReviews();
   }
 
   String _formatPrice(double price) {
@@ -544,6 +572,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     _buildCardContainer(
                       child: Column(
                         children: order.items.map((item) {
+                          final isReviewed = _reviewedProducts.contains(item.productId);
+                          final rating = _reviewRatings[item.productId];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: Row(
@@ -580,21 +610,60 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                ElevatedButton.icon(
-                                  onPressed: () => _showReviewDialog(order.id, item.productId, item.name),
-                                  icon: const Icon(Icons.rate_review_outlined, size: 16),
-                                  label: const Text('Đánh giá', style: TextStyle(fontSize: 13)),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.accent,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    minimumSize: const Size(0, 34),
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    shape: RoundedRectangleBorder(
+                                if (isReviewed)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF10B981).withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.check_circle_rounded, size: 14, color: Color(0xFF10B981)),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Đã đánh giá',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFF10B981),
+                                          ),
+                                        ),
+                                        if (rating != null) ...[
+                                          const SizedBox(width: 4),
+                                          Icon(Icons.star_rounded, size: 14, color: Colors.amber.shade600),
+                                          Text(
+                                            '$rating',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.amber.shade700,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  )
+                                else
+                                  ElevatedButton.icon(
+                                    onPressed: () => _showReviewDialog(order.id, item.productId, item.name),
+                                    icon: const Icon(Icons.rate_review_outlined, size: 16),
+                                    label: const Text('Đánh giá', style: TextStyle(fontSize: 13)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.accent,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      minimumSize: const Size(0, 34),
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           );
@@ -933,13 +1002,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   Navigator.of(dialogContext).pop();
                                 }
                                 if (mounted) {
+                                  setState(() {
+                                    _reviewedProducts.add(productId);
+                                    _reviewRatings[productId] = selectedRating;
+                                  });
                                   ScaffoldMessenger.of(this.context).showSnackBar(
                                     const SnackBar(
                                       content: Row(
                                         children: [
                                           Icon(Icons.check_circle, color: Colors.white, size: 18),
                                           SizedBox(width: 8),
-                                          Text('Đánh giá thành công!'),
+                                          Expanded(child: Text('Đánh giá thành công!')),
                                         ],
                                       ),
                                       backgroundColor: AppColors.success,

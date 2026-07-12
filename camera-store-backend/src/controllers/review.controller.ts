@@ -101,3 +101,25 @@ export const getProductReviews = async (req: IAuthRequest, res: Response, next: 
     next(error);
   }
 };
+
+/**
+ * GET /api/reviews/order/:orderId
+ * Returns reviews the current user has made for a specific order.
+ */
+export const getOrderReviews = async (req: IAuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.id;
+    const { orderId } = req.params;
+
+    const reviews = await Review.find({ user: userId, order: orderId })
+      .select('product rating comment createdAt')
+      .lean();
+
+    res.json({
+      success: true,
+      data: reviews,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
