@@ -282,6 +282,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   ),
                   const SizedBox(height: 24),
 
+                  // ── Order Tracking Timeline ──
+                  if (order.status != OrderStatus.cancelled)
+                    _buildTrackingTimeline(order),
+                  if (order.status == OrderStatus.cancelled)
+                    _buildCancelledBanner(order),
+                  const SizedBox(height: 20),
+
                   // Order Header info
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -893,4 +900,252 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       },
     );
   }
+
+  /// 4-step tracking stepper (pending → confirmed → shipping → delivered)
+  Widget _buildTrackingTimeline(OrderEntity order) {
+    final steps = [
+      _TrackingStep(
+        status: OrderStatus.pending,
+        icon: Icons.hourglass_empty_rounded,
+        label: 'Chờ xác nhận',
+        color: const Color(0xFFF59E0B),
+      ),
+      _TrackingStep(
+        status: OrderStatus.confirmed,
+        icon: Icons.inventory_2_outlined,
+        label: 'Đã xác nhận',
+        color: const Color(0xFF3B82F6),
+      ),
+      _TrackingStep(
+        status: OrderStatus.shipping,
+        icon: Icons.local_shipping_outlined,
+        label: 'Đang giao hàng',
+        color: const Color(0xFF8B5CF6),
+      ),
+      _TrackingStep(
+        status: OrderStatus.delivered,
+        icon: Icons.check_circle_outline_rounded,
+        label: 'Đã giao',
+        color: const Color(0xFF10B981),
+      ),
+    ];
+
+    // Map status → step index
+    final statusOrder = [
+      OrderStatus.pending,
+      OrderStatus.confirmed,
+      OrderStatus.shipping,
+      OrderStatus.delivered,
+    ];
+    final currentIdx = statusOrder.indexOf(order.status);
+
+    // Build a map from status → changedAt from history
+    final historyMap = <OrderStatus, DateTime>{};
+    for (final entry in order.statusHistory) {
+      historyMap[entry.status] = entry.changedAt;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Theo dõi đơn hàng',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 20),
+          ...List.generate(steps.length, (i) {
+            final step = steps[i];
+            final isDone = i < currentIdx;
+            final isCurrent = i == currentIdx;
+            final isPending = i > currentIdx;
+            final ts = historyMap[step.status];
+
+            final dotColor = isDone
+                ? const Color(0xFF10B981)
+                : isCurrent
+                    ? step.color
+                    : AppColors.divider;
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left: dot + line
+                SizedBox(
+                  width: 32,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: isPending
+                              ? AppColors.background
+                              : dotColor.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isPending ? AppColors.divider : dotColor,
+                            width: isCurrent ? 2.5 : 1.5,
+                          ),
+                        ),
+                        child: Icon(
+                          isDone ? Icons.check_rounded : step.icon,
+                          size: 16,
+                          color: isPending ? AppColors.textHint : dotColor,
+                        ),
+                      ),
+                      if (i < steps.length - 1)
+                        Container(
+                          width: 2,
+                          height: 36,
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          color: isDone
+                              ? const Color(0xFF10B981).withValues(alpha: 0.4)
+                              : AppColors.divider,
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 14),
+                // Right: label + timestamp
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: 6,
+                      bottom: i < steps.length - 1 ? 28 : 0,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          step.label,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isCurrent
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            color: isPending
+                                ? AppColors.textHint
+                                : isCurrent
+                                    ? step.color
+                                    : AppColors.textPrimary,
+                          ),
+                        ),
+                        if (ts != null) ...
+                          [
+                            const SizedBox(height: 2),
+                            Text(
+                              DateFormat('dd/MM/yyyy HH:mm').format(ts),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textHint,
+                              ),
+                            ),
+                          ],
+                        if (isCurrent && ts == null)
+                          const Text(
+                            'Đang xử lý...',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textHint,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCancelledBanner(OrderEntity order) {
+    final cancelEntry = order.statusHistory
+        .where((e) => e.status == OrderStatus.cancelled)
+        .lastOrNull;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppColors.error.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.error.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.error.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.cancel_outlined,
+              color: AppColors.error,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Đơn hàng đã bị hủy',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: AppColors.error,
+                  ),
+                ),
+                if (cancelEntry != null)
+                  Text(
+                    DateFormat('dd/MM/yyyy HH:mm').format(cancelEntry.changedAt),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textHint,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrackingStep {
+  final OrderStatus status;
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _TrackingStep({
+    required this.status,
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 }

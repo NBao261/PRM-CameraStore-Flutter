@@ -18,11 +18,12 @@ class OrderHistoryScreen extends StatefulWidget {
 
 class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   final List<Map<String, dynamic>> _tabs = [
-    {'title': 'Tất cả', 'status': null},
-    {'title': 'Chờ xác nhận', 'status': [OrderStatus.pending, OrderStatus.confirmed]},
-    {'title': 'Đang giao', 'status': [OrderStatus.shipping]},
-    {'title': 'Đã giao', 'status': [OrderStatus.delivered]},
-    {'title': 'Đã huỷ', 'status': [OrderStatus.cancelled]},
+    {'title': 'Tất cả',         'status': null},
+    {'title': 'Chờ xác nhận',  'status': [OrderStatus.pending]},
+    {'title': 'Đã xác nhận',   'status': [OrderStatus.confirmed]},
+    {'title': 'Đang giao',     'status': [OrderStatus.shipping]},
+    {'title': 'Đã giao',       'status': [OrderStatus.delivered]},
+    {'title': 'Đã huỷ',        'status': [OrderStatus.cancelled]},
   ];
 
   @override
@@ -494,7 +495,13 @@ class _OrderCard extends StatelessWidget {
                   ],
                 ),
                 
-                const Padding(
+                // Mini progress stepper (only for non-cancelled)
+                 if (order.status != OrderStatus.cancelled) ...[
+                   const SizedBox(height: 14),
+                   _buildMiniStepper(order.status),
+                 ],
+
+                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
                   child: Divider(height: 1, color: AppColors.divider),
                 ),
@@ -545,6 +552,72 @@ class _OrderCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMiniStepper(OrderStatus status) {
+    const steps = [
+      OrderStatus.pending,
+      OrderStatus.confirmed,
+      OrderStatus.shipping,
+      OrderStatus.delivered,
+    ];
+    const stepLabels = ['Chờ', 'Xác nhận', 'Giao', 'Hoàn thành'];
+    const stepColors = [
+      Color(0xFFF59E0B),
+      Color(0xFF3B82F6),
+      Color(0xFF8B5CF6),
+      Color(0xFF10B981),
+    ];
+
+    final currentIdx = steps.indexOf(status);
+
+    return Row(
+      children: List.generate(steps.length * 2 - 1, (i) {
+        if (i.isOdd) {
+          // Connector line
+          final stepIdx = i ~/ 2;
+          final isCompleted = stepIdx < currentIdx;
+          return Expanded(
+            child: Container(
+              height: 2,
+              color: isCompleted
+                  ? const Color(0xFF10B981).withValues(alpha: 0.5)
+                  : AppColors.divider,
+            ),
+          );
+        }
+        final stepIdx = i ~/ 2;
+        final isDone = stepIdx < currentIdx;
+        final isCurrent = stepIdx == currentIdx;
+        final dotColor = isDone
+            ? const Color(0xFF10B981)
+            : isCurrent
+                ? stepColors[stepIdx]
+                : AppColors.divider;
+
+        return Column(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: dotColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              stepLabels[stepIdx],
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+                color: isCurrent ? dotColor : AppColors.textHint,
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 }
