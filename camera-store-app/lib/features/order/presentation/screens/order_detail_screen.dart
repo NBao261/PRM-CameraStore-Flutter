@@ -520,19 +520,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                           style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
-                                            color: AppColors.textSecondary,
                                           ),
-                                        ),
-                                      ],
-                                    ),
+                                        ],
+                                      ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
                       );
                     },
-                    ),
                   ),
+                ),
                   const SizedBox(height: 24),
 
                   // 5. Summary
