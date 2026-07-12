@@ -273,9 +273,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
+                ElevatedButton(
                     onPressed: _isApplyingCoupon ? null : () => _applyCoupon(subtotal),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accent,
@@ -284,6 +282,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
+                      minimumSize: const Size(0, 48),
                     ),
                     child: _isApplyingCoupon
                         ? const SizedBox(
