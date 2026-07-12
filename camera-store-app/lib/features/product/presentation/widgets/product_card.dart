@@ -185,7 +185,7 @@ class _ProductCardState extends State<ProductCard> {
                         const SizedBox(height: 4),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: _buildSpecBadges().map((badge) {
+                          children: _buildSpecBadges().take(1).map((badge) {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 4),
                               child: badge,
