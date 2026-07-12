@@ -111,27 +111,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBodyBehindAppBar: true,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
-        child: ClipRRect(
+      appBar: AppBar(
+        title: const Text(
+          'Chi tiết đơn hàng',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+            letterSpacing: -0.5,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: AppColors.primary.withValues(alpha: 0.85),
+        surfaceTintColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+        centerTitle: true,
+        flexibleSpace: ClipRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: AppBar(
-              title: const Text(
-                'Chi tiết đơn hàng',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20,
-                  letterSpacing: -0.5,
-                  color: Colors.white,
-                ),
-              ),
-              backgroundColor: AppColors.primary.withValues(alpha: 0.85),
-              surfaceTintColor: Colors.transparent,
-              iconTheme: const IconThemeData(color: Colors.white),
-              elevation: 0,
-              centerTitle: true,
-            ),
+            child: Container(color: Colors.transparent),
           ),
         ),
       ),
@@ -703,9 +701,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                             const SnackBar(
                                               content: Row(
                                                 children: [
-                                                  Icon(Icons.check_circle, color: Colors.white, size: 18),
-                                                  SizedBox(width: 8),
-                                                  Text('Xác nhận nhận hàng thành công!'),
+                                                  const Icon(Icons.check_circle, color: Colors.white, size: 18),
+                                                  const SizedBox(width: 8),
+                                                  const Expanded(child: Text('Xác nhận nhận hàng thành công!')),
                                                 ],
                                               ),
                                               backgroundColor: Color(0xFF10B981),
