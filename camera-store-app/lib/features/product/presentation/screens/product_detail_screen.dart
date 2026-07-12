@@ -610,12 +610,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       final list = (data is Map && data.containsKey('data'))
           ? data['data'] as List
           : (data is List ? data : []);
-      setState(() {
-        _reviews = list.cast<Map<String, dynamic>>();
-        _isLoadingReviews = false;
-      });
+      if (mounted) {
+        setState(() {
+          _reviews = list.cast<Map<String, dynamic>>();
+          _isLoadingReviews = false;
+        });
+      }
     } catch (_) {
-      setState(() => _isLoadingReviews = false);
+      if (mounted) {
+        setState(() => _isLoadingReviews = false);
+      }
     }
   }
 
