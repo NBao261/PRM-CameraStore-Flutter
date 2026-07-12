@@ -580,19 +580,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                SizedBox(
-                                  height: 34,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () => _showReviewDialog(order.id, item.productId, item.name),
-                                    icon: const Icon(Icons.rate_review_outlined, size: 16),
-                                    label: const Text('Đánh giá', style: TextStyle(fontSize: 13)),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.accent,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
+                                ElevatedButton.icon(
+                                  onPressed: () => _showReviewDialog(order.id, item.productId, item.name),
+                                  icon: const Icon(Icons.rate_review_outlined, size: 16),
+                                  label: const Text('Đánh giá', style: TextStyle(fontSize: 13)),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.accent,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    minimumSize: const Size(0, 34),
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
                                 ),
