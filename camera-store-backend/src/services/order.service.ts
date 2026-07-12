@@ -203,6 +203,45 @@ export class OrderService {
 
     return order;
   }
+
+  async confirmReceived(userId: string, orderId: string) {
+    const order = await Order.findOne({ _id: orderId, user: userId });
+
+    if (!order) throw new NotFoundError('Không tìm thấy đơn hàng');
+
+    if (order.status !== 'shipping') {
+      throw new ValidationError('Chỉ có thể xác nhận đã nhận hàng khi đơn đang được giao');
+    }
+
+    order.status = 'delivered';
+    order.statusHistory.push({ status: 'delivered', changedAt: new Date() });
+
+    // Auto-mark COD as paid on user confirmation
+    if (order.paymentMethod === 'cod') {
+      order.paymentStatus = 'paid';
+    }
+
+    await order.save();
+
+    // Notify user
+    const notification = await Notification.create({
+      user: userId,
+      title: 'Nhận hàng thành công',
+      content: `Đơn hàng #${order._id.toString().substring(0, 8)} đã được xác nhận giao thành công. Cảm ơn bạn!`,
+      type: 'order',
+      relatedId: String(order._id),
+      relatedType: 'order',
+    });
+
+    try {
+      const { getIO } = await import('../socket');
+      getIO().to(`user_${userId}`).emit('new_notification', notification);
+    } catch (err) {
+      console.error('Socket emit error:', err);
+    }
+
+    return order;
+  }
 }
 
 export const orderService = new OrderService();

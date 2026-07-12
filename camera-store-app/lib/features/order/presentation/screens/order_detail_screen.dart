@@ -656,6 +656,106 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                     ),
                   ],
+                  // ── Confirm Received (shipping → delivered) ──
+                  if (order.status == OrderStatus.shipping) ...[
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext dialogContext) {
+                              return AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                title: const Row(
+                                  children: [
+                                    Icon(Icons.check_circle_outline_rounded,
+                                        color: Color(0xFF10B981)),
+                                    SizedBox(width: 10),
+                                    Text('Xác nhận nhận hàng'),
+                                  ],
+                                ),
+                                content: const Text(
+                                  'Bạn xác nhận đã nhận được hàng?\n\nSau khi xác nhận, bạn có thể đánh giá sản phẩm.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(dialogContext).pop(),
+                                    child: const Text('Chưa nhận'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      Navigator.of(dialogContext).pop();
+                                      // Call confirm-received API
+                                      try {
+                                        final apiClient = ApiClient();
+                                        await apiClient.dio.put('/orders/${order.id}/confirm-received');
+                                        // Reload order
+                                        if (context.mounted) {
+                                          context.read<OrderBloc>().add(
+                                            OrderDetailLoadRequested(order.id),
+                                          );
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Row(
+                                                children: [
+                                                  Icon(Icons.check_circle, color: Colors.white, size: 18),
+                                                  SizedBox(width: 8),
+                                                  Text('Xác nhận nhận hàng thành công!'),
+                                                ],
+                                              ),
+                                              backgroundColor: Color(0xFF10B981),
+                                            ),
+                                          );
+                                        }
+                                      } on DioException catch (e) {
+                                        final msg = (e.response?.data is Map)
+                                            ? e.response?.data['message'] as String? ?? 'Có lỗi xảy ra'
+                                            : 'Lỗi kết nối server';
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text(msg),
+                                              backgroundColor: AppColors.error,
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF10B981),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    child: const Text('Đã nhận hàng'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.done_all_rounded),
+                        label: const Text(
+                          'Đã nhận hàng',
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF10B981),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

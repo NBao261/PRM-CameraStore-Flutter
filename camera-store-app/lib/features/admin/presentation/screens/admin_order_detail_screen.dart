@@ -379,26 +379,35 @@ class AdminOrderDetailScreen extends StatelessWidget {
                 ),
               ),
             if (status == 'shipping')
-              SizedBox(
+              Container(
                 width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: isUpdating
-                      ? null
-                      : () => bloc.add(AdminOrderUpdateStatus(
-                            orderId: orderId,
-                            newStatus: 'delivered',
-                          )),
-                  icon: const Icon(Icons.done_all),
-                  label: const Text('Đã giao thành công',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF34A853),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8B5CF6).withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.3),
                   ),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.local_shipping_outlined,
+                      color: Color(0xFF8B5CF6),
+                      size: 20,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Đang giao hàng — Khách hàng sẽ tự xác nhận đã nhận hàng.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF8B5CF6),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             if (status != 'shipping') ...[
