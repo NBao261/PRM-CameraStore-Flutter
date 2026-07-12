@@ -298,7 +298,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                           ),
                   ),
-                ),
               ],
             ),
             if (_couponError != null) ...[
