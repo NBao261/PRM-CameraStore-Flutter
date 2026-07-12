@@ -9,6 +9,7 @@ import '../../domain/entities/order_entity.dart';
 import '../bloc/order_bloc.dart';
 import '../bloc/order_event.dart';
 import '../bloc/order_state.dart';
+import '../../../../core/routes/app_router.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final String orderId;
@@ -445,8 +446,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                       itemBuilder: (context, index) {
                         final item = order.items[index];
-                        return Padding(
-                          padding: const EdgeInsets.all(16),
+                        return InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRouter.productDetail,
+                              arguments: item.productId,
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -516,13 +525,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
                               ),
                             ],
                           ),
-                        );
-                      },
+                        ),
+                      );
+                    },
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -574,9 +582,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         children: order.items.map((item) {
                           final isReviewed = _reviewedProducts.contains(item.productId);
                           final rating = _reviewRatings[item.productId];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Row(
+                          return InkWell(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                AppRouter.productDetail,
+                                arguments: item.productId,
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Row(
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
@@ -666,7 +682,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   ),
                               ],
                             ),
-                          );
+                          ),
+                        );
                         }).toList(),
                       ),
                     ),
