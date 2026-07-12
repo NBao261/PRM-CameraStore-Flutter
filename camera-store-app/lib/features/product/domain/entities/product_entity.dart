@@ -44,6 +44,8 @@ class ProductEntity extends Equatable {
   final bool isActive;
   final String? warranty;
   final DateTime? createdAt;
+  final double averageRating;
+  final int reviewCount;
 
   const ProductEntity({
     required this.id,
@@ -61,6 +63,8 @@ class ProductEntity extends Equatable {
     this.isActive = true,
     this.warranty,
     this.createdAt,
+    this.averageRating = 0,
+    this.reviewCount = 0,
   });
 
   bool get inStock => stock > 0;

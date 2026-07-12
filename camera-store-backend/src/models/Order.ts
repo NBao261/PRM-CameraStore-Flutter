@@ -21,6 +21,8 @@ export interface IOrder extends Document {
   };
   paymentMethod: 'cod' | 'bank_transfer' | 'e_wallet';
   paymentStatus: 'unpaid' | 'paid' | 'failed';
+  couponCode?: string;
+  discountAmount: number;
   subtotal: number;
   shippingFee: number;
   total: number;
@@ -58,9 +60,11 @@ const OrderSchema: Schema = new Schema(
       enum: ['unpaid', 'paid', 'failed'],
       default: 'unpaid',
     },
-    subtotal:    { type: Number, required: true },
-    shippingFee: { type: Number, default: 0 },
-    total:       { type: Number, required: true },
+    couponCode:     { type: String, default: null },
+    discountAmount: { type: Number, default: 0 },
+    subtotal:       { type: Number, required: true },
+    shippingFee:    { type: Number, default: 0 },
+    total:          { type: Number, required: true },
     status: {
       type: String,
       enum: ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled'],

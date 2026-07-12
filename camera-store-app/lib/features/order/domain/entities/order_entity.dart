@@ -50,7 +50,9 @@ class OrderEntity extends Equatable {
   final double total;
   final OrderStatus status;
   final DateTime createdAt;
-  final String? payUrl; // Added for MoMo payment
+  final String? payUrl;
+  final String? couponCode;
+  final double discountAmount;
 
   const OrderEntity({
     required this.id,
@@ -63,6 +65,8 @@ class OrderEntity extends Equatable {
     required this.status,
     required this.createdAt,
     this.payUrl,
+    this.couponCode,
+    this.discountAmount = 0,
   });
 
   String get statusLabel {
@@ -84,5 +88,6 @@ class OrderEntity extends Equatable {
   List<Object?> get props => [
         id, items, shippingInfo, paymentMethod,
         subtotal, shippingFee, total, status, createdAt,
+        couponCode, discountAmount,
       ];
 }

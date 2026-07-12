@@ -1,9 +1,12 @@
-# Kế hoạch Phát triển Camera Store (9 Tuần)
+# Kế hoạch Phát triển Camera Store (10 Tuần)
 
-Dựa trên **Software Requirements Specification (SRS)**, dưới đây là kế hoạch phát triển (Workplan) chi tiết chia thành 9 tuần cho dự án Camera Store, bao gồm cả Frontend (Flutter) và Backend (Node.js/Express).
+Dựa trên **Software Requirements Specification (SRS)**, dưới đây là kế hoạch phát triển (Workplan) chi tiết chia thành 10 tuần cho dự án Camera Store, bao gồm cả Frontend (Flutter) và Backend (Node.js/Express).
 
 > [!NOTE]
 > _Phase 1 (Thiết kế Database & API)_ và _Khởi tạo cấu trúc Clean Architecture cho Flutter_ đã được thực hiện xong một phần lớn. Kế hoạch này sẽ tập trung mạnh vào việc hoàn thiện Frontend và tích hợp.
+
+> [!IMPORTANT]
+> **Tuần 9** được bổ sung thêm Phase 13 (Coupon) và Phase 14 (Review) để mở rộng scope phù hợp với quy mô **5 thành viên**.
 
 ---
 
@@ -125,14 +128,39 @@ _Tương ứng với Phase 10_
 
 ---
 
-## Tuần 9: Kiểm thử, Sửa lỗi & Chuẩn bị Release (UAT & Deployment)
+## Tuần 9: Mã khuyến mãi & Đánh giá sản phẩm (Coupon + Review)
+
+_Tương ứng với Phase 13, Phase 14_
+
+**Mục tiêu:** Mở rộng scope cho đội 5 thành viên – thêm tính năng mã giảm giá và đánh giá sản phẩm.
+
+- **Backend:**
+  - Tạo Model `Coupon` (code, type: percent/fixed, value, minOrderAmount, maxDiscount, expiresAt, usageLimit, usedCount, isActive).
+  - API: `POST /api/coupons` (Admin tạo), `GET /api/coupons` (Admin list), `PUT /api/coupons/:id` (Admin sửa), `POST /api/coupons/apply` (User áp dụng mã).
+  - Validate: hết hạn, hết lượt, đơn tối thiểu, mã không tồn tại.
+  - Cập nhật Order model: thêm `couponCode`, `discountAmount`.
+  - Tạo Model `Review` (user, product, order, rating: 1-5, comment, createdAt).
+  - API: `POST /api/reviews` (User tạo review), `GET /api/products/:id/reviews` (lấy reviews của sản phẩm).
+  - Validate: chỉ user đã mua (order delivered), mỗi order review 1 lần.
+- **Frontend (Flutter):**
+  - **Checkout Screen:** Thêm ô nhập mã khuyến mãi + nút "Áp dụng" → hiển thị tiền giảm, tổng mới.
+  - **Admin Coupon Management:** Màn hình CRUD mã khuyến mãi.
+  - **Product Detail Screen:** Hiển thị rating trung bình + danh sách reviews.
+  - **Order Detail Screen:** Nút "Đánh giá" sau khi đơn hàng Delivered.
+  - **Review Form:** Dialog/Screen chọn sao (1-5) + viết nhận xét.
+
+---
+
+## Tuần 10: Kiểm thử, Sửa lỗi & Chuẩn bị Release (UAT & Deployment)
 
 **Mục tiêu:** Đảm bảo hệ thống hoạt động ổn định, không có bug nghiêm trọng trước khi phát hành.
 
 - **Testing:**
   - Test toàn bộ luồng chức năng (End-to-End).
-  - Kiểm tra các Business Rules (điều kiện validate, khóa tài khoản, trạng thái giỏ hàng, v.v.).
+  - Kiểm tra các Business Rules (điều kiện validate, khóa tài khoản, trạng thái giỏ hàng, coupon, review, v.v.).
+  - Unit test cho các BLoC chính (ProductBloc, CartBloc, OrderBloc).
 - **Fixing:** Sửa các lỗi phát sinh (bugs) trên cả Backend và Frontend.
 - **Deployment:**
   - Build file APK/AAB cho Android và IPA cho iOS.
   - Deploy Backend lên server staging/production.
+

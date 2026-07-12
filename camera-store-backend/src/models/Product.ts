@@ -23,6 +23,8 @@ export interface IProduct extends Document {
   stock: number;
   isActive: boolean;
   warranty?: string;
+  averageRating: number;
+  reviewCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,9 +48,11 @@ const ProductSchema: Schema = new Schema(
       battery:      { type: String, default: '' },
       weight:       { type: String, default: '' },
     },
-    stock:    { type: Number, required: true, default: 0, min: 0 },
-    isActive: { type: Boolean, default: true },
-    warranty: { type: String, default: '' },
+    stock:         { type: Number, required: true, default: 0, min: 0 },
+    isActive:      { type: Boolean, default: true },
+    warranty:      { type: String, default: '' },
+    averageRating: { type: Number, default: 0 },
+    reviewCount:   { type: Number, default: 0 },
   },
   { timestamps: true }
 );

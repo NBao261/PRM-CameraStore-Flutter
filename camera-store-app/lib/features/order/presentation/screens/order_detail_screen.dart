@@ -2,7 +2,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:dio/dio.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/network/api_client.dart';
 import '../../domain/entities/order_entity.dart';
 import '../bloc/order_bloc.dart';
 import '../bloc/order_event.dart';
@@ -509,6 +511,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               ? 'Miễn phí'
                               : _formatPrice(order.shippingFee),
                         ),
+                        if (order.discountAmount > 0) ...[
+                          const SizedBox(height: 12),
+                          _buildSummaryRow(
+                            'Giảm giá (${order.couponCode ?? ""})',
+                            '-${_formatPrice(order.discountAmount)}',
+                            isDiscount: true,
+                          ),
+                        ],
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
                           child: Divider(height: 1, color: AppColors.divider),
@@ -521,6 +531,73 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ],
                     ),
                   ),
+                  // ── Review Button (only for delivered orders) ──
+                  if (order.status == OrderStatus.delivered) ...[
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Đánh giá sản phẩm'),
+                    const SizedBox(height: 12),
+                    _buildCardContainer(
+                      child: Column(
+                        children: order.items.map((item) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: item.imageUrl.isNotEmpty
+                                      ? Image.network(
+                                          item.imageUrl,
+                                          width: 44,
+                                          height: 44,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) => Container(
+                                            width: 44,
+                                            height: 44,
+                                            color: AppColors.background,
+                                            child: const Icon(Icons.camera_alt_outlined, size: 18, color: AppColors.textHint),
+                                          ),
+                                        )
+                                      : Container(
+                                          width: 44,
+                                          height: 44,
+                                          color: AppColors.background,
+                                          child: const Icon(Icons.camera_alt_outlined, size: 18, color: AppColors.textHint),
+                                        ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    item.name,
+                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                SizedBox(
+                                  height: 34,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () => _showReviewDialog(order.id, item.productId, item.name),
+                                    icon: const Icon(Icons.rate_review_outlined, size: 16),
+                                    label: const Text('Đánh giá', style: TextStyle(fontSize: 13)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.accent,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
                   if (order.status == OrderStatus.pending) ...[
                     const SizedBox(height: 32),
                     SizedBox(
@@ -613,7 +690,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
+  Widget _buildSummaryRow(String label, String value, {bool isTotal = false, bool isDiscount = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -630,10 +707,190 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           style: TextStyle(
             fontSize: isTotal ? 20 : 15,
             fontWeight: isTotal ? FontWeight.w900 : FontWeight.w600,
-            color: isTotal ? AppColors.accent : AppColors.textPrimary,
+            color: isDiscount
+                ? AppColors.error
+                : (isTotal ? AppColors.accent : AppColors.textPrimary),
           ),
         ),
       ],
+    );
+  }
+
+  void _showReviewDialog(String orderId, String productId, String productName) {
+    int selectedRating = 5;
+    final commentController = TextEditingController();
+    bool isSubmitting = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                24,
+                24,
+                MediaQuery.of(dialogContext).viewInsets.bottom + 24,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.divider,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Đánh giá: $productName',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 20),
+                  // Star selector
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      return GestureDetector(
+                        onTap: () {
+                          setModalState(() => selectedRating = index + 1);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Icon(
+                            index < selectedRating
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            size: 40,
+                            color: index < selectedRating
+                                ? Colors.amber.shade600
+                                : AppColors.textHint,
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 20),
+                  // Comment input
+                  TextFormField(
+                    controller: commentController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'Viết nhận xét của bạn (không bắt buộc)',
+                      hintStyle: TextStyle(
+                        color: AppColors.textHint.withOpacity(0.7),
+                      ),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.all(16),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Submit button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: isSubmitting
+                          ? null
+                          : () async {
+                              setModalState(() => isSubmitting = true);
+                              try {
+                                final apiClient = ApiClient();
+                                await apiClient.dio.post('/reviews', data: {
+                                  'orderId': orderId,
+                                  'productId': productId,
+                                  'rating': selectedRating,
+                                  'comment': commentController.text.trim(),
+                                });
+                                if (dialogContext.mounted) {
+                                  Navigator.of(dialogContext).pop();
+                                }
+                                if (mounted) {
+                                  ScaffoldMessenger.of(this.context).showSnackBar(
+                                    const SnackBar(
+                                      content: Row(
+                                        children: [
+                                          Icon(Icons.check_circle, color: Colors.white, size: 18),
+                                          SizedBox(width: 8),
+                                          Text('Đánh giá thành công!'),
+                                        ],
+                                      ),
+                                      backgroundColor: AppColors.success,
+                                    ),
+                                  );
+                                }
+                              } on DioException catch (e) {
+                                final msg = (e.response?.data is Map)
+                                    ? e.response?.data['message'] as String? ?? 'Không thể gửi đánh giá'
+                                    : 'Lỗi kết nối server';
+                                if (mounted) {
+                                  ScaffoldMessenger.of(this.context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(msg),
+                                      backgroundColor: AppColors.error,
+                                    ),
+                                  );
+                                }
+                              } finally {
+                                if (dialogContext.mounted) {
+                                  setModalState(() => isSubmitting = false);
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: isSubmitting
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Gửi đánh giá',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

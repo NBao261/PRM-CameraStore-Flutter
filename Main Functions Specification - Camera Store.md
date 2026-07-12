@@ -26,6 +26,8 @@ Nhóm cần thiết kế cấu trúc dữ liệu và REST API để phục vụ 
 | Notification     | Lưu thông báo khuyến mãi, cập nhật đơn hàng, thông báo hệ thống, thông báo từ cửa hàng                                                                                                                                               |
 | Store Location   | Lưu thông tin vị trí cửa hàng để hiển thị trên bản đồ                                                                                                                                                                                |
 | Chat Message     | Lưu nội dung tin nhắn giữa khách hàng và nhân viên hỗ trợ                                                                                                                                                                            |
+| Coupon           | Lưu mã khuyến mãi: code (unique), loại giảm (percent/fixed), giá trị giảm, đơn tối thiểu, giảm tối đa, ngày hết hạn, giới hạn lượt dùng, số lượt đã dùng, trạng thái active/inactive                                                   |
+| Review           | Lưu đánh giá sản phẩm: user_id, product_id, order_id, rating (1-5), comment, ngày tạo                                                                                                                                               |
 
 ### REST API Endpoints chính
 
@@ -50,6 +52,12 @@ Nhóm cần thiết kế cấu trúc dữ liệu và REST API để phục vụ 
 | GET    | `/api/stores`                 | Lấy danh sách cửa hàng            | Public |
 | POST   | `/api/chat`                   | Gửi tin nhắn cho nhân viên hỗ trợ | User   |
 | GET    | `/api/chat/history`           | Lấy lịch sử chat                  | User   |
+| POST   | `/api/coupons`                | Tạo mã khuyến mãi                 | Admin  |
+| GET    | `/api/coupons`                | Lấy danh sách mã khuyến mãi       | Admin  |
+| PUT    | `/api/coupons/:id`            | Sửa mã khuyến mãi                 | Admin  |
+| POST   | `/api/coupons/apply`          | Áp dụng mã khuyến mãi              | User   |
+| POST   | `/api/reviews`                | Tạo đánh giá sản phẩm             | User   |
+| GET    | `/api/products/:id/reviews`   | Lấy danh sách đánh giá sản phẩm   | Public |
 
 ### Nhóm cần trình bày rõ
 
@@ -722,8 +730,145 @@ Giảng viên có thể đánh giá chức năng này qua các điểm sau:
 
 ---
 
+## Phase 14: Coupon / Promo Code (Mã khuyến mãi)
+
+Chức năng này cho phép cửa hàng tạo các mã khuyến mãi để thu hút khách hàng mua camera, và cho phép khách hàng áp dụng mã giảm giá khi thanh toán.
+
+### Mục đích
+
+Tăng doanh số và trải nghiệm mua sắm bằng cách cung cấp ưu đãi giảm giá cho khách hàng thông qua mã khuyến mãi.
+
+### Mô tả xử lý
+
+**Phía Admin:**
+
+Admin có màn hình quản lý mã khuyến mãi, cho phép:
+
+- Tạo mã khuyến mãi mới với các thông tin: mã code (unique), loại giảm (phần trăm hoặc số tiền cố định), giá trị giảm, giá trị đơn hàng tối thiểu để áp dụng, giảm tối đa (nếu loại phần trăm), ngày hết hạn, giới hạn số lượt sử dụng, trạng thái active/inactive.
+- Xem danh sách mã khuyến mãi đã tạo (kèm thống kê số lượt đã sử dụng).
+- Sửa hoặc vô hiệu hóa mã khuyến mãi.
+
+**Phía User:**
+
+Tại màn hình Checkout, người dùng thấy ô nhập mã khuyến mãi và nút "Áp dụng". Khi nhập mã và bấm áp dụng, ứng dụng gọi API `POST /api/coupons/apply` với mã và tổng tiền đơn hàng.
+
+Backend kiểm tra:
+
+- Mã có tồn tại không.
+- Mã có đang active không.
+- Mã có hết hạn chưa.
+- Mã có hết lượt sử dụng chưa.
+- Đơn hàng có đạt giá trị tối thiểu không.
+
+Nếu hợp lệ, backend trả về số tiền giảm. Ứng dụng hiển thị:
+
+- Mã đã áp dụng thành công.
+- Tiền giảm giá.
+- Tổng tiền sau giảm.
+
+Khi đơn hàng được tạo thành công, hệ thống lưu `couponCode` và `discountAmount` vào Order, đồng thời tăng `usedCount` của coupon.
+
+### Input
+
+- Admin: Thông tin mã khuyến mãi (code, type, value, minOrderAmount, maxDiscount, expiresAt, usageLimit).
+- User: Mã khuyến mãi nhập tại Checkout.
+
+### Output
+
+- Admin: Danh sách mã khuyến mãi được quản lý.
+- User: Số tiền giảm giá được áp dụng, tổng tiền cập nhật.
+- Order: Lưu thông tin coupon đã áp dụng.
+
+### REST API Endpoints
+
+| Method | Endpoint               | Mô tả                    | Role  |
+| ------ | ---------------------- | ------------------------- | ----- |
+| POST   | `/api/coupons`         | Tạo mã khuyến mãi        | Admin |
+| GET    | `/api/coupons`         | Lấy danh sách mã          | Admin |
+| PUT    | `/api/coupons/:id`     | Sửa mã khuyến mãi        | Admin |
+| POST   | `/api/coupons/apply`   | Áp dụng mã khuyến mãi     | User  |
+
+### Yêu cầu đánh giá
+
+Giảng viên có thể đánh giá chức năng này qua các điểm sau:
+
+- Có giao diện Admin quản lý coupon (tạo, sửa, xem danh sách).
+- Có ô nhập mã khuyến mãi tại Checkout.
+- Có validate mã hợp lệ (hết hạn, hết lượt, đơn tối thiểu).
+- Có hiển thị tiền giảm và tổng tiền sau giảm.
+- Có lưu thông tin coupon vào đơn hàng.
+- Có xử lý lỗi khi mã không hợp lệ.
+
+---
+
+## Phase 15: Product Review / Rating (Đánh giá sản phẩm)
+
+Chức năng này cho phép khách hàng đã mua camera đánh giá sản phẩm bằng điểm sao và nhận xét, giúp người mua khác tham khảo.
+
+### Mục đích
+
+Tăng độ tin cậy cho sản phẩm camera thông qua đánh giá thực tế từ người đã mua. Giúp khách hàng tiềm năng đưa ra quyết định mua hàng tốt hơn.
+
+### Mô tả xử lý
+
+**Điều kiện đánh giá:**
+
+Chỉ User đã có đơn hàng ở trạng thái "Delivered" mới được phép đánh giá sản phẩm trong đơn hàng đó. Mỗi sản phẩm trong một đơn hàng chỉ được đánh giá một lần.
+
+**Viết đánh giá:**
+
+Tại màn hình Order Detail, khi đơn hàng ở trạng thái "Delivered", mỗi sản phẩm sẽ có nút "Đánh giá". Khi bấm, ứng dụng mở form/dialog cho phép:
+
+- Chọn số sao (1-5 sao, bắt buộc).
+- Viết nhận xét (tùy chọn).
+
+Ứng dụng gọi API `POST /api/reviews` với thông tin product, order, rating và comment. Backend validate quyền và tạo review.
+
+**Hiển thị đánh giá:**
+
+Tại màn hình Product Detail, ứng dụng hiển thị:
+
+- Điểm trung bình (ví dụ: ⭐ 4.8).
+- Tổng số lượt đánh giá.
+- Danh sách reviews với tên người đánh giá, số sao, nhận xét và ngày đánh giá.
+
+Backend tự động tính lại `averageRating` và `reviewCount` sau mỗi đánh giá mới.
+
+### Input
+
+- Product ID, Order ID (để validate quyền).
+- Rating (1-5 sao).
+- Comment (tùy chọn).
+
+### Output
+
+- Review được tạo và lưu vào database.
+- Product Detail hiển thị rating trung bình và danh sách reviews.
+- Nút "Đánh giá" chuyển thành "Đã đánh giá" sau khi review.
+
+### REST API Endpoints
+
+| Method | Endpoint                       | Mô tả                          | Role |
+| ------ | ------------------------------ | ------------------------------- | ---- |
+| POST   | `/api/reviews`                 | Tạo đánh giá sản phẩm          | User |
+| GET    | `/api/products/:id/reviews`    | Lấy danh sách đánh giá sản phẩm | Public |
+
+### Yêu cầu đánh giá
+
+Giảng viên có thể đánh giá chức năng này qua các điểm sau:
+
+- Có kiểm tra quyền đánh giá (chỉ user đã mua, đơn hàng Delivered).
+- Có form chọn sao và viết nhận xét.
+- Có hiển thị rating trung bình trên Product Detail.
+- Có danh sách reviews với tên, sao, nhận xét, ngày.
+- Có xử lý đánh giá trùng lặp (mỗi order chỉ review 1 lần).
+- Có thông báo phản hồi cho người dùng.
+
+---
+
 ## Luồng Demo Chính
 
 ### User Flow
 
-> Register → Login → Xem danh sách Camera → Xem chi tiết Camera → Thêm vào giỏ hàng → Cập nhật giỏ hàng → Checkout → Tạo đơn hàng → Xem lịch sử đơn hàng → Nhận thông báo → Chat với nhân viên hỗ trợ → Xem vị trí cửa hàng → Cập nhật Profile → Đăng xuất.
+> Register → Login → Xem danh sách Camera → Xem chi tiết Camera (xem đánh giá) → Thêm vào giỏ hàng → Cập nhật giỏ hàng → Checkout (nhập mã khuyến mãi) → Tạo đơn hàng → Xem lịch sử đơn hàng → Đánh giá sản phẩm (sau khi Delivered) → Nhận thông báo → Chat với nhân viên hỗ trợ → Xem vị trí cửa hàng → Cập nhật Profile → Đăng xuất.
+

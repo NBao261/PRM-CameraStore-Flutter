@@ -18,6 +18,8 @@ import chatRoutes from './routes/chat.routes';
 import paymentRoutes from './routes/payment.routes';
 import adminOrderRoutes from './routes/admin.order.routes';
 import adminChatRoutes from './routes/admin.chat.routes';
+import couponRoutes from './routes/coupon.routes';
+import reviewRoutes from './routes/review.routes';
 
 const app = express();
 
@@ -59,6 +61,8 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);
 app.use('/api/admin/chat', adminChatRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // ── Global error handler (must be last) ─────────────
 app.use(errorHandler);

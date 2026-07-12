@@ -12,15 +12,17 @@ class OrderCreateRequested extends OrderEvent {
   final ShippingInfo shippingInfo;
   final String paymentMethod;
   final List<String>? productIds;
+  final String? couponCode;
 
   const OrderCreateRequested({
     required this.shippingInfo,
     required this.paymentMethod,
     this.productIds,
+    this.couponCode,
   });
 
   @override
-  List<Object?> get props => [shippingInfo, paymentMethod, productIds];
+  List<Object?> get props => [shippingInfo, paymentMethod, productIds, couponCode];
 }
 
 class OrdersLoadRequested extends OrderEvent {

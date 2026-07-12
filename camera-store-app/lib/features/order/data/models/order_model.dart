@@ -32,6 +32,8 @@ class OrderModel {
       status: _parseStatus(orderData['status'] as String),
       createdAt: DateTime.parse(orderData['createdAt'] as String),
       payUrl: payUrl,
+      couponCode: orderData['couponCode'] as String?,
+      discountAmount: (orderData['discountAmount'] as num?)?.toDouble() ?? 0,
     );
   }
 
