@@ -1,8 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../../core/routes/app_router.dart';
 import '../../../cart/presentation/bloc/cart_bloc.dart';
 import '../../../cart/presentation/bloc/cart_event.dart';
@@ -26,8 +28,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _noteController = TextEditingController();
+  final _couponController = TextEditingController();
 
   String _selectedPayment = 'cod';
+  String? _appliedCouponCode;
+  double _discountAmount = 0;
+  bool _isApplyingCoupon = false;
+  String? _couponError;
 
   final List<Map<String, dynamic>> _paymentMethods = [
     {
@@ -67,6 +74,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _phoneController.dispose();
     _addressController.dispose();
     _noteController.dispose();
+    _couponController.dispose();
     super.dispose();
   }
 
@@ -95,8 +103,218 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             paymentMethod: _selectedPayment,
             productIds: selectedProductIds.isNotEmpty ? selectedProductIds : null,
+            couponCode: _appliedCouponCode,
           ),
         );
+  }
+
+  Future<void> _applyCoupon(double subtotal) async {
+    final code = _couponController.text.trim();
+    if (code.isEmpty) {
+      setState(() => _couponError = 'Vui lòng nhập mã khuyến mãi');
+      return;
+    }
+    setState(() {
+      _isApplyingCoupon = true;
+      _couponError = null;
+    });
+
+    try {
+      final apiClient = ApiClient();
+      final response = await apiClient.dio.post('/coupons/apply', data: {
+        'code': code,
+        'subtotal': subtotal,
+      });
+      final data = response.data['data'];
+      setState(() {
+        _appliedCouponCode = data['code'] as String;
+        _discountAmount = (data['discountAmount'] as num).toDouble();
+        _isApplyingCoupon = false;
+        _couponError = null;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Expanded(child: Text('Áp dụng mã $_appliedCouponCode thành công!')),
+              ],
+            ),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } on DioException catch (e) {
+      final msg = (e.response?.data is Map)
+          ? e.response?.data['message'] as String? ?? 'Mã không hợp lệ'
+          : 'Lỗi kết nối server';
+      setState(() {
+        _isApplyingCoupon = false;
+        _couponError = msg;
+      });
+    } catch (_) {
+      setState(() {
+        _isApplyingCoupon = false;
+        _couponError = 'Đã xảy ra lỗi, vui lòng thử lại';
+      });
+    }
+  }
+
+  void _removeCoupon() {
+    setState(() {
+      _appliedCouponCode = null;
+      _discountAmount = 0;
+      _couponController.clear();
+      _couponError = null;
+    });
+  }
+
+  Widget _buildCouponSection(double subtotal) {
+    return _buildSection(
+      title: 'Mã khuyến mãi',
+      icon: Icons.local_offer_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_appliedCouponCode != null) ...[
+            // Applied coupon display
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.success.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.success.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.check_circle, color: AppColors.success, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _appliedCouponCode!,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.success,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Giảm ${_formatPrice(_discountAmount)}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _removeCoupon,
+                    icon: const Icon(Icons.close, size: 20, color: AppColors.textSecondary),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            // Input field
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _couponController,
+                    textCapitalization: TextCapitalization.characters,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.5,
+                      color: AppColors.textPrimary,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Nhập mã khuyến mãi',
+                      hintStyle: TextStyle(
+                        color: AppColors.textHint.withOpacity(0.7),
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: 0,
+                      ),
+                      prefixIcon: const Icon(Icons.confirmation_number_outlined,
+                          color: AppColors.textSecondary, size: 20),
+                      filled: true,
+                      fillColor: AppColors.surfaceDim,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                    onPressed: _isApplyingCoupon ? null : () => _applyCoupon(subtotal),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      minimumSize: const Size(0, 48),
+                    ),
+                    child: _isApplyingCoupon
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Áp dụng',
+                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                          ),
+                  ),
+              ],
+            ),
+            if (_couponError != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _couponError!,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
   }
 
   @override
@@ -181,15 +399,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 _buildPriceRow('Tạm tính', cartState.selectedTotalAmount),
                                 const SizedBox(height: 6),
                                 _buildPriceRow('Phí vận chuyển', 0, isFree: true),
+                                if (_discountAmount > 0) ...[
+                                  const SizedBox(height: 6),
+                                  _buildPriceRow(
+                                    'Giảm giá (${_appliedCouponCode ?? ''})',
+                                    _discountAmount,
+                                    isDiscount: true,
+                                  ),
+                                ],
                                 const Divider(height: 20),
                                 _buildPriceRow(
                                   'Tổng cộng',
-                                  cartState.selectedTotalAmount,
+                                  cartState.selectedTotalAmount - _discountAmount,
                                   isTotal: true,
                                 ),
                               ],
                             ),
                           ),
+
+                          // ── Coupon Section ──
+                          _buildCouponSection(cartState.selectedTotalAmount),
 
                           // ── Shipping Info ──
                           _buildSection(
@@ -352,7 +581,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          _formatPrice(cartState.selectedTotalAmount),
+                          _formatPrice(cartState.selectedTotalAmount - _discountAmount),
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
@@ -523,7 +752,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   // ── Price Row ──
   Widget _buildPriceRow(String label, double amount,
-      {bool isTotal = false, bool isFree = false}) {
+      {bool isTotal = false, bool isFree = false, bool isDiscount = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -536,13 +765,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ),
         Text(
-          isFree ? 'Miễn phí' : _formatPrice(amount),
+          isFree
+              ? 'Miễn phí'
+              : isDiscount
+                  ? '-${_formatPrice(amount)}'
+                  : _formatPrice(amount),
           style: TextStyle(
             fontSize: isTotal ? 18 : 14,
             fontWeight: isTotal ? FontWeight.w900 : FontWeight.w600,
             color: isFree
                 ? AppColors.success
-                : (isTotal ? AppColors.accent : AppColors.textPrimary),
+                : isDiscount
+                    ? AppColors.error
+                    : (isTotal ? AppColors.accent : AppColors.textPrimary),
           ),
         ),
       ],

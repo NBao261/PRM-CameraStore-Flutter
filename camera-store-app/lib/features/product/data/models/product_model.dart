@@ -26,6 +26,8 @@ class ProductModel {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'])
           : null,
+      averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0,
+      reviewCount: json['reviewCount'] as int? ?? 0,
     );
   }
 

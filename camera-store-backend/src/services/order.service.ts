@@ -2,6 +2,7 @@ import Order from '../models/Order';
 import Cart from '../models/Cart';
 import Notification from '../models/Notification';
 import Product from '../models/Product';
+import Coupon from '../models/Coupon';
 import { NotFoundError, ValidationError } from '../utils/errors';
 
 export class OrderService {
@@ -11,6 +12,7 @@ export class OrderService {
       shippingInfo: { fullName: string; phone: string; address: string; note?: string };
       paymentMethod: 'cod' | 'bank_transfer' | 'e_wallet';
       productIds?: string[];
+      couponCode?: string;
     }
   ) {
     const cart = await Cart.findOne({ user: userId }).populate('items.product');
@@ -52,13 +54,40 @@ export class OrderService {
 
     const subtotal = items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
     const shippingFee = 0;
-    const total = subtotal + shippingFee;
+
+    // ── Coupon discount ─────────────────────────────────
+    let discountAmount = 0;
+    let couponCode: string | undefined;
+
+    if (data.couponCode) {
+      const coupon = await Coupon.findOne({ code: data.couponCode.toUpperCase(), isActive: true });
+
+      if (coupon && new Date() <= coupon.expiresAt && coupon.usedCount < coupon.usageLimit && subtotal >= coupon.minOrderAmount) {
+        if (coupon.type === 'percent') {
+          discountAmount = Math.round((subtotal * coupon.value) / 100);
+          if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+            discountAmount = coupon.maxDiscount;
+          }
+        } else {
+          discountAmount = coupon.value;
+        }
+        if (discountAmount > subtotal) discountAmount = subtotal;
+
+        couponCode = coupon.code;
+        coupon.usedCount += 1;
+        await coupon.save();
+      }
+    }
+
+    const total = subtotal + shippingFee - discountAmount;
 
     const order = await Order.create({
       user: userId,
       items,
       shippingInfo: data.shippingInfo,
       paymentMethod: data.paymentMethod,
+      couponCode: couponCode || null,
+      discountAmount,
       subtotal,
       shippingFee,
       total,
@@ -160,6 +189,45 @@ export class OrderService {
       user: userId,
       title: 'Đã huỷ đơn hàng',
       content: `Đơn hàng #${order._id.toString().substring(0, 8)} đã được huỷ thành công.`,
+      type: 'order',
+      relatedId: String(order._id),
+      relatedType: 'order',
+    });
+
+    try {
+      const { getIO } = await import('../socket');
+      getIO().to(`user_${userId}`).emit('new_notification', notification);
+    } catch (err) {
+      console.error('Socket emit error:', err);
+    }
+
+    return order;
+  }
+
+  async confirmReceived(userId: string, orderId: string) {
+    const order = await Order.findOne({ _id: orderId, user: userId });
+
+    if (!order) throw new NotFoundError('Không tìm thấy đơn hàng');
+
+    if (order.status !== 'shipping') {
+      throw new ValidationError('Chỉ có thể xác nhận đã nhận hàng khi đơn đang được giao');
+    }
+
+    order.status = 'delivered';
+    order.statusHistory.push({ status: 'delivered', changedAt: new Date() });
+
+    // Auto-mark COD as paid on user confirmation
+    if (order.paymentMethod === 'cod') {
+      order.paymentStatus = 'paid';
+    }
+
+    await order.save();
+
+    // Notify user
+    const notification = await Notification.create({
+      user: userId,
+      title: 'Nhận hàng thành công',
+      content: `Đơn hàng #${order._id.toString().substring(0, 8)} đã được xác nhận giao thành công. Cảm ơn bạn!`,
       type: 'order',
       relatedId: String(order._id),
       relatedType: 'order',

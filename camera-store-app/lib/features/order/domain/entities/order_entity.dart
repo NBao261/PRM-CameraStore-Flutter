@@ -40,6 +40,16 @@ class OrderItemEntity extends Equatable {
   List<Object?> get props => [productId, name, price, quantity, imageUrl];
 }
 
+class StatusHistoryEntry extends Equatable {
+  final OrderStatus status;
+  final DateTime changedAt;
+
+  const StatusHistoryEntry({required this.status, required this.changedAt});
+
+  @override
+  List<Object?> get props => [status, changedAt];
+}
+
 class OrderEntity extends Equatable {
   final String id;
   final List<OrderItemEntity> items;
@@ -50,7 +60,10 @@ class OrderEntity extends Equatable {
   final double total;
   final OrderStatus status;
   final DateTime createdAt;
-  final String? payUrl; // Added for MoMo payment
+  final String? payUrl;
+  final String? couponCode;
+  final double discountAmount;
+  final List<StatusHistoryEntry> statusHistory;
 
   const OrderEntity({
     required this.id,
@@ -63,6 +76,9 @@ class OrderEntity extends Equatable {
     required this.status,
     required this.createdAt,
     this.payUrl,
+    this.couponCode,
+    this.discountAmount = 0,
+    this.statusHistory = const [],
   });
 
   String get statusLabel {
@@ -84,5 +100,6 @@ class OrderEntity extends Equatable {
   List<Object?> get props => [
         id, items, shippingInfo, paymentMethod,
         subtotal, shippingFee, total, status, createdAt,
+        couponCode, discountAmount, statusHistory,
       ];
 }

@@ -42,3 +42,13 @@ export const cancelOrder = async (req: IAuthRequest, res: Response, next: NextFu
     next(error);
   }
 };
+
+// PUT /api/orders/:id/confirm-received
+export const confirmReceived = async (req: IAuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await orderService.confirmReceived(req.user!.id, req.params.id as string);
+    ApiResponse.success(res, data, 'Xác nhận nhận hàng thành công');
+  } catch (error) {
+    next(error);
+  }
+};

@@ -35,6 +35,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         shippingInfo: event.shippingInfo,
         paymentMethod: event.paymentMethod,
         productIds: event.productIds,
+        couponCode: event.couponCode,
       );
       final updatedOrders = List<OrderEntity>.from(state.orders)..insert(0, order);
       emit(state.copyWith(

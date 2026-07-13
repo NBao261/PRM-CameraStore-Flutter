@@ -32,6 +32,19 @@ class OrderModel {
       status: _parseStatus(orderData['status'] as String),
       createdAt: DateTime.parse(orderData['createdAt'] as String),
       payUrl: payUrl,
+      couponCode: orderData['couponCode'] as String?,
+      discountAmount: (orderData['discountAmount'] as num?)?.toDouble() ?? 0,
+      statusHistory: ((orderData['statusHistory'] as List?) ?? [])
+          .map((h) {
+            final map = h as Map<String, dynamic>;
+            return StatusHistoryEntry(
+              status: _parseStatus(map['status'] as String? ?? 'pending'),
+              changedAt: DateTime.tryParse(
+                      map['changedAt'] as String? ?? '') ??
+                  DateTime.now(),
+            );
+          })
+          .toList(),
     );
   }
 

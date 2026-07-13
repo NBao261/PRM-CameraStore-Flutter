@@ -185,12 +185,37 @@ class _ProductCardState extends State<ProductCard> {
                         const SizedBox(height: 4),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: _buildSpecBadges().map((badge) {
+                          children: _buildSpecBadges().take(1).map((badge) {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 4),
                               child: badge,
                             );
                           }).toList(),
+                        ),
+                      ],
+                      if (widget.product.reviewCount > 0) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            ...List.generate(5, (i) => Icon(
+                              i < widget.product.averageRating.round()
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
+                              size: 12,
+                              color: i < widget.product.averageRating.round()
+                                  ? Colors.amber.shade600
+                                  : AppColors.textHint,
+                            )),
+                            const SizedBox(width: 4),
+                            Text(
+                              '(${widget.product.reviewCount})',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.textHint,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                       const Spacer(),

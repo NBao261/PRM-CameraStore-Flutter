@@ -6,6 +6,7 @@ abstract class OrderRepository {
     required ShippingInfo shippingInfo,
     required String paymentMethod,
     List<String>? productIds,
+    String? couponCode,
   });
 
   /// Get list of orders, optionally filtered by status

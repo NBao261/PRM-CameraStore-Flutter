@@ -28,6 +28,7 @@ class OrderRemoteDataSource {
     required ShippingInfo shippingInfo,
     required String paymentMethod,
     List<String>? productIds,
+    String? couponCode,
   }) async {
     final response = await apiClient.dio.post('/orders', data: {
       'shippingInfo': {
@@ -38,6 +39,7 @@ class OrderRemoteDataSource {
       },
       'paymentMethod': paymentMethod,
       if (productIds != null && productIds.isNotEmpty) 'productIds': productIds,
+      if (couponCode != null && couponCode.isNotEmpty) 'couponCode': couponCode,
     });
     return OrderModel.fromJson(_extractData(response.data));
   }

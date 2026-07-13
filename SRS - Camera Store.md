@@ -69,6 +69,18 @@
 - Hệ thống hiển thị thông tin cá nhân của người dùng.
 - Hệ thống cho phép chỉnh sửa thông tin cá nhân, cập nhật địa chỉ, đổi mật khẩu và đăng xuất.
 
+### Phase 13: Coupon / Promo Code (Mã khuyến mãi)
+- Hệ thống cho phép Admin tạo, chỉnh sửa và quản lý mã khuyến mãi (coupon).
+- Hệ thống cho phép User nhập mã khuyến mãi tại màn hình Checkout để được giảm giá.
+- Hệ thống kiểm tra tính hợp lệ của mã (còn hạn, còn lượt dùng, đơn tối thiểu).
+- Hệ thống tự động tính toán và hiển thị số tiền giảm giá trên tổng đơn hàng.
+- Hệ thống lưu thông tin mã khuyến mãi đã áp dụng vào đơn hàng.
+
+### Phase 14: Product Review / Rating (Đánh giá sản phẩm)
+- Hệ thống cho phép User đã nhận hàng (đơn hàng ở trạng thái "Delivered") viết đánh giá và chấm sao (1-5) cho sản phẩm.
+- Hệ thống hiển thị danh sách đánh giá và điểm trung bình trên màn hình Chi tiết sản phẩm.
+- Hệ thống đảm bảo mỗi User chỉ được đánh giá một sản phẩm trong cùng một đơn hàng một lần.
+
 ---
 
 ## 3. Non-functional Requirements (Yêu cầu phi chức năng)
@@ -123,3 +135,17 @@
 ### Phase 12: User Profile Screen
 - Người dùng không được phép thay đổi địa chỉ Email đã dùng để đăng ký.
 - Khi đổi mật khẩu, mật khẩu mới cũng phải tuân thủ quy tắc độ dài tối thiểu 6 ký tự.
+
+### Phase 13: Coupon / Promo Code
+- Mã khuyến mãi phải có các thuộc tính: code (unique), loại giảm (phần trăm hoặc số tiền cố định), giá trị giảm, giá trị đơn hàng tối thiểu, giảm tối đa (nếu loại phần trăm), ngày hết hạn, giới hạn số lượt sử dụng, trạng thái (active/inactive).
+- Hệ thống không cho phép áp dụng mã đã hết hạn, đã hết lượt sử dụng hoặc đang bị vô hiệu hóa.
+- Nếu đơn hàng không đạt giá trị tối thiểu, mã khuyến mãi sẽ bị từ chối kèm thông báo rõ ràng.
+- Mỗi đơn hàng chỉ được áp dụng tối đa một mã khuyến mãi.
+- Khi đơn hàng được tạo thành công với mã khuyến mãi, hệ thống tự động tăng số lượt đã sử dụng (`usedCount`).
+
+### Phase 14: Product Review / Rating
+- Chỉ User đã mua sản phẩm (đơn hàng trạng thái "Delivered") mới được phép đánh giá sản phẩm đó.
+- Mỗi User chỉ được đánh giá một sản phẩm trong cùng một đơn hàng một lần duy nhất.
+- Đánh giá bao gồm: số sao (1-5, bắt buộc) và nội dung nhận xét (tùy chọn).
+- Hệ thống tự động tính và cập nhật điểm trung bình (`averageRating`) và số lượt đánh giá (`reviewCount`) của sản phẩm sau mỗi đánh giá mới.
+

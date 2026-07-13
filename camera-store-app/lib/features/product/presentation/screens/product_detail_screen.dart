@@ -31,10 +31,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final GlobalKey _cartIconKey = GlobalKey();
   final GlobalKey _addToCartBtnKey = GlobalKey();
 
+  // Reviews
+  List<Map<String, dynamic>> _reviews = [];
+  bool _isLoadingReviews = false;
+
   @override
   void initState() {
     super.initState();
     _loadProduct();
+    _loadReviews();
   }
 
   @override
@@ -391,6 +396,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       height: 1.7,
                     ),
                   ),
+
+                  // ── Reviews Section ──
+                  const SizedBox(height: 40),
+                  _buildReviewsSection(product),
                 ],
               ),
             ),
@@ -586,6 +595,196 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _loadReviews() async {
+    setState(() => _isLoadingReviews = true);
+    try {
+      final apiClient = ApiClient();
+      final response = await apiClient.dio.get(
+        '/reviews/products/${widget.productId}/reviews',
+      );
+      final data = response.data;
+      final list = (data is Map && data.containsKey('data'))
+          ? data['data'] as List
+          : (data is List ? data : []);
+      if (mounted) {
+        setState(() {
+          _reviews = list.cast<Map<String, dynamic>>();
+          _isLoadingReviews = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingReviews = false);
+      }
+    }
+  }
+
+  Widget _buildReviewsSection(ProductEntity product) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header with average rating
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Đánh giá sản phẩm',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            if (product.reviewCount > 0) ...[
+              Icon(Icons.star_rounded, color: Colors.amber.shade600, size: 22),
+              const SizedBox(width: 4),
+              Text(
+                product.averageRating.toStringAsFixed(1),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '(${product.reviewCount})',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        if (_isLoadingReviews)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+                strokeWidth: 2,
+              ),
+            ),
+          )
+        else if (_reviews.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.rate_review_outlined,
+                    size: 40, color: AppColors.textHint.withOpacity(0.5)),
+                const SizedBox(height: 12),
+                const Text(
+                  'Chưa có đánh giá nào',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ...(_reviews.map((review) => _buildReviewItem(review)).toList()),
+      ],
+    );
+  }
+
+  Widget _buildReviewItem(Map<String, dynamic> review) {
+    final user = review['user'] as Map<String, dynamic>?;
+    final name = user?['name'] as String? ?? 'Người dùng';
+    final rating = (review['rating'] as num?)?.toInt() ?? 5;
+    final comment = review['comment'] as String? ?? '';
+    final createdAt = review['createdAt'] != null
+        ? DateTime.tryParse(review['createdAt'] as String)
+        : null;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: AppColors.primary.withOpacity(0.1),
+                child: Text(
+                  name.isNotEmpty ? name[0].toUpperCase() : 'U',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (createdAt != null)
+                      Text(
+                        '${createdAt.day}/${createdAt.month}/${createdAt.year}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textHint,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(5, (i) {
+                  return Icon(
+                    i < rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                    size: 16,
+                    color: i < rating ? Colors.amber.shade600 : AppColors.textHint,
+                  );
+                }),
+              ),
+            ],
+          ),
+          if (comment.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              comment,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

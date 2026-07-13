@@ -12,11 +12,13 @@ class OrderRepositoryImpl implements OrderRepository {
     required ShippingInfo shippingInfo,
     required String paymentMethod,
     List<String>? productIds,
+    String? couponCode,
   }) {
     return _remoteDataSource.createOrder(
       shippingInfo: shippingInfo,
       paymentMethod: paymentMethod,
       productIds: productIds,
+      couponCode: couponCode,
     );
   }
 
