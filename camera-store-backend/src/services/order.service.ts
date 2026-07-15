@@ -1,4 +1,5 @@
 import Order from '../models/Order';
+import User from '../models/User';
 import Cart from '../models/Cart';
 import Notification from '../models/Notification';
 import Product from '../models/Product';
@@ -119,9 +120,32 @@ export class OrderService {
       relatedType: 'order',
     });
 
+    // Create admin notifications
+    const admins = await User.find({ role: 'admin' });
+    const adminNotifs = admins.map(admin => ({
+      user: admin._id,
+      title: 'Đơn hàng mới',
+      content: `Có đơn hàng mới #${order._id.toString().substring(0, 8)} vừa được đặt.`,
+      type: 'order',
+      relatedId: String(order._id),
+      relatedType: 'order',
+    }));
+    
+    if (adminNotifs.length > 0) {
+      await Notification.insertMany(adminNotifs);
+    }
+
     try {
       const { getIO } = await import('../socket');
-      getIO().to(`user_${userId}`).emit('new_notification', notification);
+      const io = getIO();
+      io.to(`user_${userId}`).emit('new_notification', notification);
+      
+      admins.forEach(admin => {
+        io.to(`user_${admin._id}`).emit('new_notification', adminNotifs[0]);
+      });
+
+      // Emit real-time new order to admin
+      io.to('admin_room').emit('new_order', order);
     } catch (err) {
       console.error('Socket emit error:', err);
     }
@@ -196,7 +220,30 @@ export class OrderService {
 
     try {
       const { getIO } = await import('../socket');
-      getIO().to(`user_${userId}`).emit('new_notification', notification);
+      const io = getIO();
+      io.to(`user_${userId}`).emit('new_notification', notification);
+      
+      const admins = await User.find({ role: 'admin' });
+      const adminNotifs = admins.map(admin => ({
+        user: admin._id,
+        title: 'Khách hàng huỷ đơn',
+        content: `Đơn hàng #${order._id.toString().substring(0, 8)} đã bị huỷ bởi người dùng.`,
+        type: 'order',
+        relatedId: String(order._id),
+        relatedType: 'order',
+      }));
+      
+      if (adminNotifs.length > 0) {
+        await Notification.insertMany(adminNotifs);
+      }
+
+      admins.forEach(admin => {
+        io.to(`user_${admin._id}`).emit('new_notification', adminNotifs[0]);
+      });
+      
+      // Emit real-time status update
+      io.to(`user_${userId}`).emit('order_status_updated', order);
+      io.to('admin_room').emit('order_status_updated', order);
     } catch (err) {
       console.error('Socket emit error:', err);
     }
@@ -235,7 +282,30 @@ export class OrderService {
 
     try {
       const { getIO } = await import('../socket');
-      getIO().to(`user_${userId}`).emit('new_notification', notification);
+      const io = getIO();
+      io.to(`user_${userId}`).emit('new_notification', notification);
+      
+      const admins = await User.find({ role: 'admin' });
+      const adminNotifs = admins.map(admin => ({
+        user: admin._id,
+        title: 'Đơn hàng hoàn tất',
+        content: `Đơn hàng #${order._id.toString().substring(0, 8)} đã được khách hàng xác nhận nhận hàng.`,
+        type: 'order',
+        relatedId: String(order._id),
+        relatedType: 'order',
+      }));
+      
+      if (adminNotifs.length > 0) {
+        await Notification.insertMany(adminNotifs);
+      }
+
+      admins.forEach(admin => {
+        io.to(`user_${admin._id}`).emit('new_notification', adminNotifs[0]);
+      });
+      
+      // Emit real-time status update
+      io.to(`user_${userId}`).emit('order_status_updated', order);
+      io.to('admin_room').emit('order_status_updated', order);
     } catch (err) {
       console.error('Socket emit error:', err);
     }

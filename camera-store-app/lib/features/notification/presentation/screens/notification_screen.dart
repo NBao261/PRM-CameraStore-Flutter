@@ -5,6 +5,10 @@ import '../bloc/notification_bloc.dart';
 import '../bloc/notification_event.dart';
 import '../bloc/notification_state.dart';
 import 'package:intl/intl.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../admin/presentation/bloc/admin_order_bloc.dart';
+import '../../../admin/presentation/screens/admin_order_detail_screen.dart';
+import '../../../../core/routes/app_router.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -125,7 +129,35 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           if (!isRead) {
                             context.read<NotificationBloc>().add(NotificationMarkAsReadRequested(notification.id));
                           }
-                          // Add navigation logic based on notification type if needed
+                          
+                          if (notification.type == 'order' && notification.relatedId != null) {
+                            final user = context.read<AuthBloc>().state.user;
+                            if (user?.role == 'admin') {
+                              final adminState = context.read<AdminOrderBloc>().state;
+                              final order = adminState.orders.cast<Map<String, dynamic>?>().firstWhere(
+                                (o) => o?['_id'] == notification.relatedId, 
+                                orElse: () => null
+                              );
+                              
+                              if (order != null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => BlocProvider.value(
+                                      value: context.read<AdminOrderBloc>(),
+                                      child: AdminOrderDetailScreen(order: order),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Không tìm thấy thông tin đơn hàng, vui lòng tải lại trang')),
+                                );
+                              }
+                            } else {
+                              Navigator.pushNamed(context, AppRouter.orderDetail, arguments: notification.relatedId);
+                            }
+                          }
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),

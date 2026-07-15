@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/network/socket_service.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/repositories/order_repository.dart';
 import 'order_event.dart';
@@ -7,12 +9,26 @@ import 'order_state.dart';
 
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final OrderRepository orderRepository;
+  StreamSubscription? _orderStatusSubscription;
 
   OrderBloc({required this.orderRepository}) : super(const OrderState()) {
     on<OrderCreateRequested>(_onOrderCreateRequested);
     on<OrdersLoadRequested>(_onOrdersLoadRequested);
     on<OrderDetailLoadRequested>(_onOrderDetailLoadRequested);
     on<OrderCancelRequested>(_onOrderCancelRequested);
+
+    _orderStatusSubscription = SocketService().orderStatusStream.listen((data) {
+      add(const OrdersLoadRequested());
+      if (state.currentOrder != null && state.currentOrder!.id == data['_id']) {
+        add(OrderDetailLoadRequested(data['_id']));
+      }
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _orderStatusSubscription?.cancel();
+    return super.close();
   }
 
   String _parseError(dynamic e) {

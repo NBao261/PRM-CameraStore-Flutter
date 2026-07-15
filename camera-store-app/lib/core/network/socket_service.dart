@@ -18,6 +18,14 @@ class SocketService {
   final _chatMessageController = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get chatMessageStream => _chatMessageController.stream;
 
+  // Stream controller to broadcast new orders (for admin)
+  final _newOrderController = StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get newOrderStream => _newOrderController.stream;
+
+  // Stream controller to broadcast order status updates
+  final _orderStatusController = StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get orderStatusStream => _orderStatusController.stream;
+
   void connect(String userId) {
     if (_socket != null && _socket!.connected) return;
 
@@ -51,6 +59,18 @@ class SocketService {
     _socket?.on('new_message', (data) {
       if (data is Map<String, dynamic>) {
         _chatMessageController.add(data);
+      }
+    });
+
+    _socket?.on('new_order', (data) {
+      if (data is Map<String, dynamic>) {
+        _newOrderController.add(data);
+      }
+    });
+
+    _socket?.on('order_status_updated', (data) {
+      if (data is Map<String, dynamic>) {
+        _orderStatusController.add(data);
       }
     });
 
@@ -104,5 +124,7 @@ class SocketService {
     disconnect();
     _notificationController.close();
     _chatMessageController.close();
+    _newOrderController.close();
+    _orderStatusController.close();
   }
 }

@@ -2,20 +2,20 @@
 
 > **Dự án:** Ứng dụng bán Camera  
 > **Frontend:** Flutter (Dart)  
-> **Backend:** Node.js Express REST API  
+> **Backend:** Node.js Express REST hệ thống  
 > **Database:** MongoDB  
 > **Roles:** User (Khách hàng)  
 > **Chức năng bổ sung:** Chat với nhân viên hỗ trợ (Human-to-human chat)  
 
 ---
 
-## Phase 1: Design Database / API Structure
+## Phase 1: Cấu trúc Cơ sở dữ liệu (Database)
 
-Nhóm cần thiết kế cấu trúc dữ liệu và REST API để phục vụ toàn bộ ứng dụng bán camera. Backend sử dụng Node.js Express, dữ liệu được lưu trữ trong MongoDB.
+Hệ thống sử dụng MongoDB làm cơ sở dữ liệu để lưu trữ toàn bộ thông tin của ứng dụng.
 
 ### Các dữ liệu chính cần có
 
-| Nhóm dữ liệu     | Mô tả                                                                                                                                                                                                                                |
+| Collection (Tập dữ liệu)     | Mô tả                                                                                                                                                                                                                                |
 | ------------------| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | User             | Lưu thông tin tài khoản: họ tên, email, số điện thoại, địa chỉ giao hàng, mật khẩu đã mã hóa (bcrypt), avatar, avatar                                                                                                                |
 | Product (Camera) | Lưu thông tin camera: tên sản phẩm, thương hiệu, hình ảnh (nhiều ảnh), giá bán, giá khuyến mãi, mô tả, thông số kỹ thuật (megapixel, loại cảm biến, ISO, loại ống kính, quay video, kết nối), tồn kho, trạng thái còn hàng, danh mục |
@@ -29,44 +29,14 @@ Nhóm cần thiết kế cấu trúc dữ liệu và REST API để phục vụ 
 | Coupon           | Lưu mã khuyến mãi: code (unique), loại giảm (percent/fixed), giá trị giảm, đơn tối thiểu, giảm tối đa, ngày hết hạn, giới hạn lượt dùng, số lượt đã dùng, trạng thái active/inactive                                                   |
 | Review           | Lưu đánh giá sản phẩm: user_id, product_id, order_id, rating (1-5), comment, ngày tạo                                                                                                                                               |
 
-### REST API Endpoints chính
-
-| Method | Endpoint                      | Mô tả                             | Role   |
-| --------| -------------------------------| -----------------------------------| --------|
-| POST   | `/api/auth/register`          | Đăng ký tài khoản                 | Public |
-| POST   | `/api/auth/login`             | Đăng nhập                         | Public |
-| GET    | `/api/auth/profile`           | Lấy thông tin cá nhân             | User   |
-| PUT    | `/api/auth/profile`           | Cập nhật thông tin cá nhân        | User   |
-| GET    | `/api/products`               | Lấy danh sách sản phẩm            | Public |
-| GET    | `/api/products/:id`           | Lấy chi tiết sản phẩm             | Public |
-| GET    | `/api/categories`             | Lấy danh sách danh mục            | Public |
-| GET    | `/api/cart`                   | Lấy giỏ hàng                      | User   |
-| POST   | `/api/cart`                   | Thêm sản phẩm vào giỏ             | User   |
-| PUT    | `/api/cart/:id`               | Cập nhật số lượng                 | User   |
-| DELETE | `/api/cart/:id`               | Xóa sản phẩm khỏi giỏ             | User   |
-| POST   | `/api/orders`                 | Tạo đơn hàng                      | User   |
-| GET    | `/api/orders`                 | Lấy danh sách đơn hàng            | User   |
-| GET    | `/api/orders/:id`             | Chi tiết đơn hàng                 | User   |
-| GET    | `/api/notifications`          | Lấy danh sách thông báo           | User   |
-| PUT    | `/api/notifications/:id/read` | Đánh dấu đã đọc                   | User   |
-| GET    | `/api/stores`                 | Lấy danh sách cửa hàng            | Public |
-| POST   | `/api/chat`                   | Gửi tin nhắn cho nhân viên hỗ trợ | User   |
-| GET    | `/api/chat/history`           | Lấy lịch sử chat                  | User   |
-| POST   | `/api/coupons`                | Tạo mã khuyến mãi                 | Admin  |
-| GET    | `/api/coupons`                | Lấy danh sách mã khuyến mãi       | Admin  |
-| PUT    | `/api/coupons/:id`            | Sửa mã khuyến mãi                 | Admin  |
-| POST   | `/api/coupons/apply`          | Áp dụng mã khuyến mãi              | User   |
-| POST   | `/api/reviews`                | Tạo đánh giá sản phẩm             | User   |
-| GET    | `/api/products/:id/reviews`   | Lấy danh sách đánh giá sản phẩm   | Public |
-
 ### Nhóm cần trình bày rõ
 
-- Sơ đồ database hoặc mô tả collection/table.
-- Quan hệ giữa các bảng hoặc collection.
-- API endpoint đầy đủ cho REST API.
+- Sơ đồ cơ sở dữ liệu hoặc mô tả các Collection (tương đương với Table/Bảng).
+- Mối quan hệ giữa các Collection.
+- 
 - Cách ứng dụng đọc, ghi, cập nhật và xóa dữ liệu.
 - Cách dữ liệu được sử dụng trong từng màn hình.
-- Cách xác thực người dùng (JWT Token + Middleware).
+- Cách xác thực người dùng (Phiên đăng nhập (Session/Token) + Middleware).
 
 ---
 
@@ -95,9 +65,9 @@ Người dùng nhập đầy đủ thông tin và bấm nút Register. Ứng d�
 - Số điện thoại có hợp lệ không.
 - Mật khẩu có đủ độ dài tối thiểu (ví dụ 6 ký tự) không.
 - Mật khẩu và xác nhận mật khẩu có khớp nhau không.
-- Email đã tồn tại trong hệ thống hay chưa (gọi API kiểm tra).
+- Email đã tồn tại trong hệ thống hay chưa (tra).
 
-Nếu thông tin hợp lệ, ứng dụng gọi API `POST /api/auth/register` để tạo tài khoản mới. Backend mã hóa mật khẩu bằng bcrypt trước khi lưu vào database. Sau khi đăng ký thành công, ứng dụng hiển thị thông báo thành công và chuyển sang màn hình đăng nhập.
+Nếu thông tin hợp lệ, ứng dụng gọi hệ thống để tạo tài khoản mới. Hệ thống sẽ mã hóa bảo mật mật khẩu của người dùng trước khi lưu trữ. Sau khi đăng ký thành công, ứng dụng hiển thị thông báo thành công và chuyển sang màn hình đăng nhập.
 
 Nếu thông tin không hợp lệ hoặc email đã tồn tại, ứng dụng hiển thị thông báo lỗi rõ ràng tại vị trí tương ứng.
 
@@ -111,7 +81,7 @@ Nếu thông tin không hợp lệ hoặc email đã tồn tại, ứng dụng h
 
 ### Output
 
-- Tài khoản mới được tạo trong database.
+- Tài khoản mới được tạo trong cơ sở dữ liệu.
 - Hiển thị thông báo đăng ký thành công.
 - Chuyển sang màn hình đăng nhập.
 - Hoặc hiển thị thông báo lỗi nếu đăng ký thất bại.
@@ -142,7 +112,7 @@ Chức năng này cho phép người dùng đăng nhập vào ứng dụng để
 
 Khi mở ứng dụng, người dùng có thể được đưa đến màn hình đăng nhập nếu chưa đăng nhập trước đó. Người dùng nhập email và mật khẩu, sau đó bấm nút Login.
 
-Ứng dụng gọi API `POST /api/auth/login` và kiểm tra:
+Ứng dụng gọi hệ thống và kiểm tra:
 
 - Người dùng đã nhập đủ thông tin hay chưa.
 - Email có đúng định dạng không.
@@ -150,7 +120,7 @@ Khi mở ứng dụng, người dùng có thể được đưa đến màn hình
 - Tài khoản có tồn tại trong hệ thống không.
 - Tài khoản có bị khóa (blocked) không.
 
-Nếu thông tin hợp lệ, backend trả về JWT Token cùng thông tin user. Ứng dụng lưu token vào SharedPreferences hoặc SecureStorage, sau đó chuyển đến màn hình chính của khách hàng (Home/Product List).
+Nếu thông tin hợp lệ, Hệ thống phản hồi Phiên đăng nhập (Session/Token) cùng thông tin user. Ứng dụng lưu token vào SharedPreferences hoặc SecureStorage, sau đó chuyển đến màn hình chính của khách hàng (Home/Product List).
 
 Nếu thông tin sai, ứng dụng hiển thị thông báo lỗi rõ ràng, ví dụ: "Email hoặc mật khẩu không đúng" hoặc "Tài khoản đã bị khóa".
 
@@ -164,7 +134,7 @@ Nếu thông tin sai, ứng dụng hiển thị thông báo lỗi rõ ràng, ví
 ### Output
 
 - Đăng nhập thành công và chuyển sang màn hình chính (User) hoặc Dashboard (Admin).
-- JWT Token được lưu trữ.
+- Lưu trạng thái đăng nhập bảo mật.
 - Hoặc hiển thị thông báo lỗi nếu đăng nhập thất bại.
 
 ### Yêu cầu đánh giá
@@ -173,7 +143,7 @@ Giảng viên có thể đánh giá chức năng này qua các điểm sau:
 
 - Có kiểm tra dữ liệu nhập vào.
 - Có hiển thị lỗi khi nhập sai.
-- Có lưu trạng thái đăng nhập (JWT Token).
+- Có lưu trạng thái đăng nhập (Phiên đăng nhập (Session/Token)).
 - Có phân biệt người dùng đã đăng nhập và chưa đăng nhập.
 - Có giao diện rõ ràng, dễ sử dụng.
 - Có nút chuyển sang màn hình Register.
@@ -190,7 +160,7 @@ Giúp khách hàng xem nhanh các sản phẩm camera hiện có, tìm kiếm s�
 
 ### Mô tả xử lý
 
-Khi người dùng (User) truy cập màn hình danh sách sản phẩm, ứng dụng gọi API `GET /api/products` để lấy dữ liệu sản phẩm và hiển thị thành danh sách hoặc dạng lưới (Grid).
+Khi người dùng (User) truy cập màn hình danh sách sản phẩm, ứng dụng gọi hệ thống để lấy dữ liệu sản phẩm và hiển thị thành danh sách hoặc dạng lưới (Grid).
 
 Mỗi sản phẩm nên hiển thị các thông tin cơ bản:
 
@@ -214,7 +184,7 @@ Khi người dùng chọn một sản phẩm, ứng dụng chuyển sang màn h�
 
 ### Input
 
-- Danh sách sản phẩm từ API `GET /api/products`.
+- Danh sách sản phẩm từ hệ thống.
 - Từ khóa tìm kiếm (query params: `?search=keyword`).
 - Điều kiện lọc sản phẩm nếu có (query params: `?category=mirrorless&brand=sony&minPrice=5000000&maxPrice=20000000`).
 
@@ -228,7 +198,7 @@ Khi người dùng chọn một sản phẩm, ứng dụng chuyển sang màn h�
 
 Giảng viên có thể đánh giá chức năng này qua các điểm sau:
 
-- Có hiển thị danh sách sản phẩm từ dữ liệu thật (API).
+- Có hiển thị danh sách sản phẩm từ dữ liệu thật (hệ thống).
 - Có hình ảnh, tên và giá sản phẩm.
 - Có xử lý trạng thái loading khi tải dữ liệu.
 - Có xử lý trường hợp không có sản phẩm.
@@ -247,7 +217,7 @@ Giúp khách hàng hiểu rõ sản phẩm camera trước khi quyết định t
 
 ### Mô tả xử lý
 
-Khi người dùng chọn một sản phẩm từ màn hình danh sách, ứng dụng gọi API `GET /api/products/:id` và mở màn hình chi tiết sản phẩm, hiển thị đầy đủ thông tin của camera đó.
+Khi người dùng chọn một sản phẩm từ màn hình danh sách, ứng dụng gọi hệ thống và mở màn hình chi tiết sản phẩm, hiển thị đầy đủ thông tin của camera đó.
 
 Thông tin chi tiết nên bao gồm:
 
@@ -272,7 +242,7 @@ Người dùng có thể chọn số lượng sản phẩm muốn mua. Nếu s�
 ### Output
 
 - Hiển thị thông tin chi tiết sản phẩm.
-- Thêm sản phẩm vào giỏ hàng qua API `POST /api/cart` nếu hợp lệ.
+- Thêm sản phẩm vào giỏ hàng qua hệ thống nếu hợp lệ.
 - Hiển thị thông báo thành công hoặc lỗi.
 
 ### Yêu cầu đánh giá
@@ -298,7 +268,7 @@ Giúp khách hàng kiểm tra lại sản phẩm camera muốn mua trước khi 
 
 ### Mô tả xử lý
 
-Khi người dùng mở màn hình giỏ hàng, ứng dụng gọi API `GET /api/cart` và hiển thị danh sách các sản phẩm đã được thêm vào. Mỗi dòng sản phẩm trong giỏ hàng nên có:
+Khi người dùng mở màn hình giỏ hàng, ứng dụng gọi hệ thống và hiển thị danh sách các sản phẩm đã được thêm vào. Mỗi dòng sản phẩm trong giỏ hàng nên có:
 
 - Hình ảnh sản phẩm.
 - Tên sản phẩm.
@@ -308,7 +278,7 @@ Khi người dùng mở màn hình giỏ hàng, ứng dụng gọi API `GET /api
 - Nút tăng/giảm số lượng.
 - Nút xóa sản phẩm khỏi giỏ hàng.
 
-Người dùng có thể thay đổi số lượng sản phẩm bằng cách gọi API `PUT /api/cart/:id`. Khi số lượng thay đổi, ứng dụng phải tự động cập nhật lại tổng tiền. Nếu người dùng xóa một sản phẩm (API `DELETE /api/cart/:id`), sản phẩm đó sẽ biến mất khỏi giỏ hàng và tổng tiền cũng được tính lại.
+Người dùng có thể thay đổi số lượng sản phẩm bằng cách gọi hệ thống. Khi số lượng thay đổi, ứng dụng phải tự động cập nhật lại tổng tiền. Nếu người dùng xóa một sản phẩm (hệ thống), sản phẩm đó sẽ biến mất khỏi giỏ hàng và tổng tiền cũng được tính lại.
 
 Nếu giỏ hàng rỗng, ứng dụng cần hiển thị thông báo như: "Your cart is empty" hoặc "Giỏ hàng của bạn đang trống".
 
@@ -316,7 +286,7 @@ Khi người dùng đã kiểm tra xong, họ có thể bấm nút Checkout đ�
 
 ### Input
 
-- Danh sách sản phẩm trong giỏ hàng từ API.
+- Danh sách sản phẩm trong giỏ hàng từ hệ thống.
 - Thao tác tăng/giảm số lượng.
 - Thao tác xóa sản phẩm.
 - Thao tác chuyển sang thanh toán.
@@ -371,7 +341,7 @@ Người dùng chọn phương thức thanh toán, ví dụ:
 - Chuyển khoản ngân hàng.
 - Ví điện tử giả lập (momo sandbox, vnPay sandbox).
 
-Sau khi người dùng bấm Place Order hoặc Confirm Order, ứng dụng gọi API `POST /api/orders` với dữ liệu đơn hàng. Backend kiểm tra dữ liệu, tạo đơn hàng mới với trạng thái "pending", lưu vào database, xóa giỏ hàng hiện tại, tạo notification cho user, rồi trả về kết quả. Ứng dụng hiển thị thông báo đặt hàng thành công.
+Sau khi người dùng bấm Place Order hoặc Confirm Order, ứng dụng gọi hệ thống với dữ liệu đơn hàng. Hệ thống kiểm tra dữ liệu, tạo đơn hàng mới với trạng thái "pending", lưu vào cơ sở dữ liệu, xóa giỏ hàng hiện tại, tạo notification cho user, rồi trả về kết quả. Ứng dụng hiển thị thông báo đặt hàng thành công.
 
 ### Input
 
@@ -382,7 +352,7 @@ Sau khi người dùng bấm Place Order hoặc Confirm Order, ứng dụng gọ
 
 ### Output
 
-- Đơn hàng mới được tạo qua API.
+- Đơn hàng mới được tạo qua hệ thống.
 - Giỏ hàng được làm trống.
 - Hiển thị thông báo đặt hàng thành công.
 - Có thể chuyển sang màn hình thông báo hoặc màn hình danh sách sản phẩm.
@@ -394,7 +364,7 @@ Giảng viên có thể đánh giá chức năng này qua các điểm sau:
 - Có hiển thị tóm tắt đơn hàng.
 - Có nhập và kiểm tra thông tin giao hàng.
 - Có chọn phương thức thanh toán.
-- Có tạo đơn hàng qua API backend.
+- Có tạo đơn hàng qua hệ thống backend.
 - Có cập nhật trạng thái đơn hàng.
 - Có xóa giỏ hàng sau khi đặt hàng thành công.
 - Có thông báo kết quả cho người dùng.
@@ -411,7 +381,7 @@ Giúp khách hàng theo dõi trạng thái đơn hàng và xem lại thông tin 
 
 ### Mô tả xử lý
 
-Khi người dùng mở màn hình lịch sử đơn hàng, ứng dụng gọi API `GET /api/orders` và hiển thị danh sách các đơn hàng của khách hàng đó.
+Khi người dùng mở màn hình lịch sử đơn hàng, ứng dụng gọi hệ thống và hiển thị danh sách các đơn hàng của khách hàng đó.
 
 Mỗi đơn hàng nên hiển thị:
 
@@ -421,7 +391,7 @@ Mỗi đơn hàng nên hiển thị:
 - Trạng thái đơn hàng (Pending, Confirmed, Shipping, Delivered, Cancelled).
 - Số lượng sản phẩm.
 
-Khi người dùng bấm vào một đơn hàng, ứng dụng gọi API `GET /api/orders/:id` và hiển thị chi tiết đơn hàng gồm:
+Khi người dùng bấm vào một đơn hàng, ứng dụng gọi hệ thống và hiển thị chi tiết đơn hàng gồm:
 
 - Danh sách sản phẩm trong đơn.
 - Thông tin giao hàng.
@@ -433,7 +403,7 @@ Khi người dùng bấm vào một đơn hàng, ứng dụng gọi API `GET /ap
 
 ### Input
 
-- Danh sách đơn hàng từ API `GET /api/orders`.
+- Danh sách đơn hàng từ hệ thống.
 - Thao tác chọn đơn hàng để xem chi tiết.
 - Bộ lọc trạng thái đơn hàng nếu có.
 
@@ -466,7 +436,7 @@ Giúp khách hàng nhận được thông tin mới từ cửa hàng như khuy�
 
 ### Mô tả xử lý
 
-Khi người dùng mở màn hình thông báo, ứng dụng gọi API `GET /api/notifications` và hiển thị danh sách các thông báo.
+Khi người dùng mở màn hình thông báo, ứng dụng gọi hệ thống và hiển thị danh sách các thông báo.
 
 Thông báo có thể gồm:
 
@@ -485,11 +455,11 @@ Mỗi thông báo nên có:
 - Trạng thái đã đọc hoặc chưa đọc.
 - Loại thông báo (order, promotion, system).
 
-Khi người dùng bấm vào một thông báo, ứng dụng gọi API `PUT /api/notifications/:id/read` để đánh dấu đã đọc, đồng thời có thể chuyển đến màn hình liên quan, ví dụ màn hình đơn hàng hoặc màn hình chi tiết sản phẩm.
+Khi người dùng bấm vào một thông báo, ứng dụng gọi hệ thống để đánh dấu đã đọc, đồng thời có thể chuyển đến màn hình liên quan, ví dụ màn hình đơn hàng hoặc màn hình chi tiết sản phẩm.
 
 ### Input
 
-- Danh sách thông báo từ API.
+- Danh sách thông báo từ hệ thống.
 - Thao tác chọn thông báo.
 - Thao tác đánh dấu đã đọc.
 
@@ -522,7 +492,7 @@ Giúp khách hàng biết địa chỉ cửa hàng, xem vị trí trên bản đ
 
 ### Mô tả xử lý
 
-Khi người dùng mở màn hình bản đồ, ứng dụng gọi API `GET /api/stores` để lấy thông tin cửa hàng và hiển thị vị trí trên Google Map hoặc một thư viện bản đồ phù hợp trong Flutter (google_maps_flutter).
+Khi người dùng mở màn hình bản đồ, ứng dụng gọi hệ thống để lấy thông tin cửa hàng và hiển thị vị trí trên Google Map hoặc một thư viện bản đồ phù hợp trong Flutter (google_maps_flutter).
 
 Thông tin nên hiển thị gồm:
 
@@ -542,7 +512,7 @@ Ví dụ cửa hàng:
 
 ### Input
 
-- Tọa độ cửa hàng từ API.
+- Tọa độ cửa hàng từ hệ thống.
 - Thông tin địa chỉ cửa hàng.
 
 ### Output
@@ -577,7 +547,7 @@ Tạo kênh hỗ trợ khách hàng trực tiếp ngay trong ứng dụng, cho p
 
 Khi người dùng mở màn hình Chat, ứng dụng hiển thị khung hội thoại giữa khách hàng và nhân viên hỗ trợ.
 
-Người dùng có thể nhập nội dung tin nhắn và bấm gửi. Ứng dụng gọi API `POST /api/chat` với nội dung tin nhắn. Tin nhắn được gửi đến hệ thống để nhân viên hỗ trợ có thể đọc và trả lời. Ứng dụng có thể sử dụng WebSocket hoặc Socket.io để nhận phản hồi theo thời gian thực (real-time) từ nhân viên. Tin nhắn và phản hồi được lưu vào database.
+Người dùng có thể nhập nội dung tin nhắn và bấm gửi. Ứng dụng gọi hệ thống với nội dung tin nhắn. Tin nhắn được gửi đến hệ thống để nhân viên hỗ trợ có thể đọc và trả lời. Ứng dụng có thể nhận phản hồi theo thời gian thực (real-time) từ nhân viên. Tin nhắn và phản hồi được lưu vào cơ sở dữ liệu.
 
 Nội dung chat có thể bao gồm:
 
@@ -595,7 +565,7 @@ Mỗi tin nhắn nên có:
 - Thời gian gửi.
 - Trạng thái gửi thành công.
 
-Lịch sử chat được lưu và có thể tải lại qua API `GET /api/chat/history` khi mở lại màn hình.
+Lịch sử chat được lưu và có thể tải lại qua hệ thống khi mở lại màn hình.
 
 ### Input
 
@@ -606,7 +576,7 @@ Lịch sử chat được lưu và có thể tải lại qua API `GET /api/chat/
 ### Output
 
 - Tin nhắn được hiển thị trên màn hình.
-- Tin nhắn được lưu vào database.
+- Tin nhắn được lưu vào cơ sở dữ liệu.
 - Tin nhắn phản hồi từ nhân viên hỗ trợ được cập nhật trên giao diện.
 - Lịch sử chat được tải lại khi mở màn hình.
 
@@ -634,7 +604,7 @@ Giúp khách hàng quản lý thông tin tài khoản, cập nhật địa chỉ
 
 ### Mô tả xử lý
 
-Khi người dùng mở màn hình Profile, ứng dụng gọi API `GET /api/auth/profile` và hiển thị thông tin cá nhân gồm:
+Khi người dùng mở màn hình Profile, ứng dụng gọi hệ thống và hiển thị thông tin cá nhân gồm:
 
 - Avatar (có thể upload hoặc chọn mặc định).
 - Họ và tên.
@@ -642,23 +612,23 @@ Khi người dùng mở màn hình Profile, ứng dụng gọi API `GET /api/aut
 - Số điện thoại.
 - Địa chỉ giao hàng mặc định.
 
-Người dùng có thể bấm nút Edit để chỉnh sửa thông tin. Sau khi sửa, bấm Save để gọi API `PUT /api/auth/profile` cập nhật thông tin.
+Người dùng có thể bấm nút Edit để chỉnh sửa thông tin. Sau khi sửa, bấm Save để gọi hệ thống cập nhật thông tin.
 
 Màn hình Profile cũng nên có:
 
 - Nút đổi mật khẩu.
 - Nút xem lịch sử đơn hàng (điều hướng sang Order History).
-- Nút đăng xuất (xóa JWT Token và chuyển về màn hình Login).
+- Nút đăng xuất (xóa Phiên đăng nhập (Session/Token) và chuyển về màn hình Login).
 
 ### Input
 
-- Thông tin cá nhân từ API.
+- Thông tin cá nhân từ hệ thống.
 - Thông tin cập nhật từ người dùng.
 
 ### Output
 
 - Thông tin cá nhân được hiển thị.
-- Thông tin được cập nhật qua API.
+- Thông tin được cập nhật qua hệ thống.
 - Đăng xuất thành công.
 
 ### Yêu cầu đánh giá
@@ -671,62 +641,6 @@ Giảng viên có thể đánh giá chức năng này qua các điểm sau:
 - Có chức năng đổi mật khẩu.
 - Có chức năng đăng xuất.
 - Có giao diện rõ ràng, dễ sử dụng.
-
----
-
-## Phase 13: Apply State Management – Provider / Bloc
-
-Chức năng này yêu cầu nhóm áp dụng cơ chế quản lý trạng thái trong Flutter, ví dụ Provider hoặc Bloc, để quản lý dữ liệu và trạng thái của ứng dụng.
-
-### Mục đích
-
-Giúp ứng dụng hoạt động ổn định, dễ bảo trì và dễ mở rộng. State management giúp dữ liệu được cập nhật đồng bộ giữa các màn hình, ví dụ khi thêm sản phẩm vào giỏ hàng thì số lượng sản phẩm trong giỏ được cập nhật ngay.
-
-### Mô tả xử lý
-
-Nhóm cần chọn một phương pháp quản lý trạng thái, ví dụ:
-
-- Provider.
-- Bloc.
-- Cubit.
-- Riverpod (nếu được giảng viên chấp nhận).
-
-Đối với project này, nhóm có thể dùng state management cho các phần sau:
-
-| State cần quản lý | Mô tả |
-|---|---|
-| Authentication State | Quản lý trạng thái đã đăng nhập/chưa đăng nhập, JWT token |
-| Product State | Quản lý danh sách sản phẩm, trạng thái loading, lỗi tải dữ liệu |
-| Cart State | Quản lý sản phẩm trong giỏ hàng, số lượng, tổng tiền |
-| Order State | Quản lý quá trình tạo đơn hàng và trạng thái đặt hàng |
-| Notification State | Quản lý danh sách thông báo, số thông báo chưa đọc |
-| Chat State | Quản lý danh sách tin nhắn chat, trạng thái gửi/nhận tin nhắn |
-| Category State | Quản lý danh sách danh mục/thương hiệu |
-
-Ví dụ: Khi người dùng bấm Add to Cart ở màn hình chi tiết sản phẩm, CartProvider hoặc CartBloc sẽ gọi API thêm vào giỏ hàng, cập nhật danh sách sản phẩm trong giỏ. Màn hình giỏ hàng nhận dữ liệu mới và hiển thị sản phẩm vừa được thêm mà không cần tải lại toàn bộ ứng dụng.
-
-### Input
-
-- Sự kiện từ người dùng: đăng nhập, đăng ký, thêm vào giỏ, xóa sản phẩm, đặt hàng, gửi tin nhắn, thao tác admin.
-- Dữ liệu từ REST API backend.
-- Trạng thái hiện tại của ứng dụng.
-
-### Output
-
-- UI được cập nhật theo trạng thái mới.
-- Dữ liệu giữa các màn hình được đồng bộ.
-- Ứng dụng phản hồi đúng khi có loading, error hoặc success.
-
-### Yêu cầu đánh giá
-
-Giảng viên có thể đánh giá chức năng này qua các điểm sau:
-
-- Có sử dụng Provider hoặc Bloc rõ ràng.
-- Không xử lý toàn bộ logic trực tiếp trong UI.
-- Có tách logic xử lý ra khỏi màn hình.
-- Có cập nhật UI khi dữ liệu thay đổi.
-- Có quản lý trạng thái loading, success, error.
-- Có áp dụng state management vào các chức năng chính: login, register, product list, cart, checkout, chat.
 
 ---
 
@@ -750,9 +664,9 @@ Admin có màn hình quản lý mã khuyến mãi, cho phép:
 
 **Phía User:**
 
-Tại màn hình Checkout, người dùng thấy ô nhập mã khuyến mãi và nút "Áp dụng". Khi nhập mã và bấm áp dụng, ứng dụng gọi API `POST /api/coupons/apply` với mã và tổng tiền đơn hàng.
+Tại màn hình Checkout, người dùng thấy ô nhập mã khuyến mãi và nút "Áp dụng". Khi nhập mã và bấm áp dụng, ứng dụng gọi hệ thống với mã và tổng tiền đơn hàng.
 
-Backend kiểm tra:
+Hệ thống kiểm tra:
 
 - Mã có tồn tại không.
 - Mã có đang active không.
@@ -760,7 +674,7 @@ Backend kiểm tra:
 - Mã có hết lượt sử dụng chưa.
 - Đơn hàng có đạt giá trị tối thiểu không.
 
-Nếu hợp lệ, backend trả về số tiền giảm. Ứng dụng hiển thị:
+Nếu hợp lệ, Hệ thống phản hồi số tiền giảm. Ứng dụng hiển thị:
 
 - Mã đã áp dụng thành công.
 - Tiền giảm giá.
@@ -778,15 +692,6 @@ Khi đơn hàng được tạo thành công, hệ thống lưu `couponCode` và 
 - Admin: Danh sách mã khuyến mãi được quản lý.
 - User: Số tiền giảm giá được áp dụng, tổng tiền cập nhật.
 - Order: Lưu thông tin coupon đã áp dụng.
-
-### REST API Endpoints
-
-| Method | Endpoint               | Mô tả                    | Role  |
-| ------ | ---------------------- | ------------------------- | ----- |
-| POST   | `/api/coupons`         | Tạo mã khuyến mãi        | Admin |
-| GET    | `/api/coupons`         | Lấy danh sách mã          | Admin |
-| PUT    | `/api/coupons/:id`     | Sửa mã khuyến mãi        | Admin |
-| POST   | `/api/coupons/apply`   | Áp dụng mã khuyến mãi     | User  |
 
 ### Yêu cầu đánh giá
 
@@ -822,7 +727,7 @@ Tại màn hình Order Detail, khi đơn hàng ở trạng thái "Delivered", m�
 - Chọn số sao (1-5 sao, bắt buộc).
 - Viết nhận xét (tùy chọn).
 
-Ứng dụng gọi API `POST /api/reviews` với thông tin product, order, rating và comment. Backend validate quyền và tạo review.
+Ứng dụng gọi hệ thống với thông tin product, order, rating và comment. Hệ thống validate quyền và tạo review.
 
 **Hiển thị đánh giá:**
 
@@ -832,7 +737,7 @@ Tại màn hình Product Detail, ứng dụng hiển thị:
 - Tổng số lượt đánh giá.
 - Danh sách reviews với tên người đánh giá, số sao, nhận xét và ngày đánh giá.
 
-Backend tự động tính lại `averageRating` và `reviewCount` sau mỗi đánh giá mới.
+Hệ thống tự động tính lại `averageRating` và `reviewCount` sau mỗi đánh giá mới.
 
 ### Input
 
@@ -842,16 +747,9 @@ Backend tự động tính lại `averageRating` và `reviewCount` sau mỗi đ�
 
 ### Output
 
-- Review được tạo và lưu vào database.
+- Review được tạo và lưu vào cơ sở dữ liệu.
 - Product Detail hiển thị rating trung bình và danh sách reviews.
 - Nút "Đánh giá" chuyển thành "Đã đánh giá" sau khi review.
-
-### REST API Endpoints
-
-| Method | Endpoint                       | Mô tả                          | Role |
-| ------ | ------------------------------ | ------------------------------- | ---- |
-| POST   | `/api/reviews`                 | Tạo đánh giá sản phẩm          | User |
-| GET    | `/api/products/:id/reviews`    | Lấy danh sách đánh giá sản phẩm | Public |
 
 ### Yêu cầu đánh giá
 
@@ -884,7 +782,7 @@ Giúp Admin nhanh chóng nắm bắt các chỉ số quan trọng như doanh thu
 
 ### Mô tả xử lý
 
-Khi Admin đăng nhập thành công, màn hình đầu tiên hiển thị là Dashboard. Ứng dụng gọi API `GET /api/admin/orders/dashboard` để lấy dữ liệu thống kê.
+Khi Admin đăng nhập thành công, màn hình đầu tiên hiển thị là Dashboard. Ứng dụng gọi hệ thống để lấy dữ liệu thống kê.
 
 Các thông tin hiển thị bao gồm:
 - **Doanh thu tổng:** Tổng số tiền thu được từ các đơn hàng thành công (Delivered/Confirmed).
@@ -911,9 +809,9 @@ Duy trì danh mục sản phẩm của cửa hàng luôn được cập nhật, 
 ### Mô tả xử lý
 
 - **Xem danh sách sản phẩm:** Mở tab "Sản phẩm", ứng dụng hiển thị danh sách tất cả sản phẩm (bao gồm cả sản phẩm hết hàng hoặc ẩn). Có thanh tìm kiếm và lọc theo danh mục.
-- **Thêm sản phẩm mới:** Admin bấm nút "+" hoặc "Add Product". Điền các thông tin: Tên, Hình ảnh (Upload nhiều ảnh), Giá bán, Danh mục, Số lượng tồn kho, Mô tả, và Thông số kỹ thuật chi tiết. Ứng dụng gửi dữ liệu POST lên API.
-- **Sửa sản phẩm:** Admin bấm vào một sản phẩm cụ thể để chỉnh sửa thông tin (ví dụ cập nhật giá hoặc thêm ảnh mới). Gửi request PUT lên server.
-- **Xóa sản phẩm:** Admin có thể xóa (hoặc chuyển trạng thái ngừng bán) sản phẩm. Gửi request DELETE lên server.
+- **Thêm sản phẩm mới:** Admin bấm nút "+" hoặc "Add Product". Điền các thông tin: Tên, Hình ảnh (Upload nhiều ảnh), Giá bán, Danh mục, Số lượng tồn kho, Mô tả, và Thông số kỹ thuật chi tiết. Ứng dụng lưu thông tin vào hệ thống.
+- **Sửa sản phẩm:** Admin bấm vào một sản phẩm cụ thể để chỉnh sửa thông tin (ví dụ cập nhật giá hoặc thêm ảnh mới). cập nhật thông tin.
+- **Xóa sản phẩm:** Admin có thể xóa (hoặc chuyển trạng thái ngừng bán) sản phẩm. xóa dữ liệu khỏi hệ thống.
 
 ### Output
 
@@ -934,7 +832,7 @@ Chức năng quan trọng nhất giúp Admin xử lý các đơn đặt hàng t�
 
 - **Danh sách đơn hàng:** Mở tab "Đơn hàng", ứng dụng tải toàn bộ đơn hàng, sắp xếp theo thời gian mới nhất, có phân loại theo trạng thái (Pending, Confirmed, Shipping, Delivered, Cancelled).
 - **Chi tiết đơn hàng:** Bấm vào đơn hàng để xem chi tiết: Khách hàng (Tên, Số điện thoại, Địa chỉ), Sản phẩm đã đặt, Tổng tiền, và Phương thức thanh toán.
-- **Cập nhật trạng thái:** Admin có thể duyệt đơn (Pending -> Confirmed), báo đang giao (Confirmed -> Shipping) bằng cách chọn từ menu dropdown hoặc bấm nút tương ứng. Gọi API `PUT /api/admin/orders/:id/status`.
+- **Cập nhật trạng thái:** Admin có thể duyệt đơn (Pending -> Confirmed), báo đang giao (Confirmed -> Shipping) bằng cách chọn từ menu dropdown hoặc bấm nút tương ứng. Gọi hệ thống.
 - Khi cập nhật trạng thái thành công, hệ thống tự động gửi notification đến điện thoại của User.
 
 ### Output
@@ -950,7 +848,7 @@ Quản lý thông báo và phản hồi tin nhắn của khách hàng.
 
 ### Mô tả xử lý
 
-- **Admin Notification:** Khi có khách hàng mới đặt đơn, hủy đơn, hoặc xác nhận đã nhận hàng, hệ thống phát một thông báo real-time qua Socket.io đến tất cả Admin. Ở tab "Thông báo", Admin thấy danh sách các hoạt động mới nhất. Bấm vào thông báo sẽ điều hướng trực tiếp đến chi tiết đơn hàng tương ứng.
+- **Admin Notification:** Khi có khách hàng mới đặt đơn, hủy đơn, hoặc xác nhận đã nhận hàng, hệ thống phát một thông báo real-time  đến tất cả Admin. Ở tab "Thông báo", Admin thấy danh sách các hoạt động mới nhất. Bấm vào thông báo sẽ điều hướng trực tiếp đến chi tiết đơn hàng tương ứng.
 - **Admin Chat:** Tab "Chat" liệt kê tất cả các cuộc hội thoại với khách hàng. Admin có thể chọn một cuộc hội thoại để chat trực tiếp, tư vấn sản phẩm hoặc hỗ trợ bảo hành. Tin nhắn được đồng bộ real-time 2 chiều.
 
 ### Admin Flow

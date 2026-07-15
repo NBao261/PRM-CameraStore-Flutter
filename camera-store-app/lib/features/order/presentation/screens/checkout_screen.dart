@@ -44,12 +44,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       'color': AppColors.success,
     },
     {
-      'value': 'bank_transfer',
-      'label': 'Chuyển khoản ngân hàng',
-      'icon': Icons.account_balance_outlined,
-      'color': AppColors.info,
-    },
-    {
       'value': 'e_wallet',
       'label': 'Ví điện tử (MoMo, ZaloPay)',
       'icon': Icons.wallet_outlined,
