@@ -1,15 +1,36 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/network/socket_service.dart';
 import '../../data/repositories/admin_repository.dart';
 import 'admin_order_event.dart';
 import 'admin_order_state.dart';
 
 class AdminOrderBloc extends Bloc<AdminOrderEvent, AdminOrderState> {
   final AdminRepository _repository;
+  StreamSubscription? _newOrderSubscription;
+  StreamSubscription? _orderStatusSubscription;
 
   AdminOrderBloc(this._repository) : super(const AdminOrderState()) {
     on<AdminDashboardLoad>(_onDashboardLoad);
     on<AdminOrderLoadAll>(_onLoadAll);
     on<AdminOrderUpdateStatus>(_onUpdateStatus);
+
+    _newOrderSubscription = SocketService().newOrderStream.listen((_) {
+      add(const AdminOrderLoadAll());
+      add(const AdminDashboardLoad());
+    });
+
+    _orderStatusSubscription = SocketService().orderStatusStream.listen((_) {
+      add(const AdminOrderLoadAll());
+      add(const AdminDashboardLoad());
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _newOrderSubscription?.cancel();
+    _orderStatusSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onDashboardLoad(

@@ -97,7 +97,12 @@ export const updateOrderStatus = async (req: IAuthRequest, res: Response, next: 
 
     try {
       const { getIO } = await import('../socket');
-      getIO().to(`user_${order.user}`).emit('new_notification', notification);
+      const io = getIO();
+      io.to(`user_${order.user}`).emit('new_notification', notification);
+      
+      // Emit real-time status update
+      io.to(`user_${order.user}`).emit('order_status_updated', order);
+      io.to('admin_room').emit('order_status_updated', order);
     } catch (err) {
       console.error('Socket emit error:', err);
     }

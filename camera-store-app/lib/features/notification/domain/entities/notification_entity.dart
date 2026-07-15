@@ -7,6 +7,8 @@ class NotificationEntity extends Equatable {
   final String type;
   final bool isRead;
   final DateTime createdAt;
+  final String? relatedId;
+  final String? relatedType;
 
   const NotificationEntity({
     required this.id,
@@ -15,8 +17,10 @@ class NotificationEntity extends Equatable {
     required this.type,
     required this.isRead,
     required this.createdAt,
+    this.relatedId,
+    this.relatedType,
   });
 
   @override
-  List<Object> get props => [id, title, content, type, isRead, createdAt];
+  List<Object?> get props => [id, title, content, type, isRead, createdAt, relatedId, relatedType];
 }

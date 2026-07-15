@@ -8,6 +8,10 @@ import '../bloc/admin_chat_state.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_order_list_screen.dart';
 import 'admin_chat_list_screen.dart';
+import '../../../notification/presentation/screens/notification_screen.dart';
+import '../../../notification/presentation/bloc/notification_bloc.dart';
+import '../../../notification/presentation/bloc/notification_event.dart';
+import '../../../notification/presentation/bloc/notification_state.dart';
 
 class AdminMainScreen extends StatefulWidget {
   const AdminMainScreen({super.key});
@@ -23,6 +27,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     AdminDashboardScreen(),
     AdminOrderListScreen(),
     AdminChatListScreen(),
+    NotificationScreen(),
   ];
 
   @override
@@ -30,6 +35,8 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     super.initState();
     // Socket is already connected via main app, just join admin room
     SocketService().joinAdminRoom();
+    // Load notifications to show badge immediately
+    context.read<NotificationBloc>().add(NotificationLoadRequested());
   }
 
   @override
@@ -88,6 +95,20 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
               ),
               activeIcon: const Icon(Icons.chat),
               label: 'Chat',
+            ),
+            BottomNavigationBarItem(
+              icon: BlocBuilder<NotificationBloc, NotificationState>(
+                builder: (context, state) {
+                  final unreadCount = state.notifications.where((n) => !n.isRead).length;
+                  return Badge(
+                    isLabelVisible: unreadCount > 0,
+                    label: Text(unreadCount.toString()),
+                    child: const Icon(Icons.notifications_none_outlined),
+                  );
+                },
+              ),
+              activeIcon: const Icon(Icons.notifications),
+              label: 'Thông báo',
             ),
           ],
         ),
