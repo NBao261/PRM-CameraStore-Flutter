@@ -139,7 +139,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 32),
+                  // Forgot Password
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/forgot-password');
+                      },
+                      child: Text(
+                        'Quên mật khẩu?',
+                        style: TextStyle(
+                          color: AppColors.accent,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
                   // Login button
                   BlocBuilder<AuthBloc, AuthState>(

@@ -54,7 +54,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
               ),
             );
             // Navigate to Login and clear all previous routes
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/login', (route) => false);
           }
           if (state.status == AuthStatus.error && state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -97,7 +98,6 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                       ),
                 ),
                 const SizedBox(height: 40),
-                
                 TextFormField(
                   controller: _otpController,
                   keyboardType: TextInputType.number,
@@ -128,7 +128,6 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                   },
                 ),
                 const SizedBox(height: 32),
-                
                 BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, state) {
                     final isLoading = state.status == AuthStatus.loading;

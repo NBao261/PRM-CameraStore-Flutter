@@ -16,6 +16,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthProfileUpdateRequested>(_onProfileUpdateRequested);
     on<AuthPasswordChangeRequested>(_onPasswordChangeRequested);
+    on<AuthForgotPasswordRequested>(_onForgotPasswordRequested);
+    on<AuthResetPasswordRequested>(_onResetPasswordRequested);
   }
 
   Future<void> _onCheckStatus(
@@ -170,6 +172,46 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         errorMessage: 'Đã có lỗi xảy ra khi đổi mật khẩu.',
       ));
       emit(state.copyWith(status: AuthStatus.authenticated));
+    }
+  }
+
+  Future<void> _onForgotPasswordRequested(
+    AuthForgotPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(status: AuthStatus.loading));
+    try {
+      await _authRepository.forgotPassword(event.email);
+      emit(state.copyWith(status: AuthStatus.forgotPasswordOtpSent));
+    } on Failure catch (e) {
+      emit(state.copyWith(status: AuthStatus.error, errorMessage: e.message));
+    } catch (e) {
+      emit(state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+      ));
+    }
+  }
+
+  Future<void> _onResetPasswordRequested(
+    AuthResetPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(status: AuthStatus.loading));
+    try {
+      await _authRepository.resetPassword(
+        email: event.email,
+        otp: event.otp,
+        newPassword: event.newPassword,
+      );
+      emit(state.copyWith(status: AuthStatus.passwordResetSuccess));
+    } on Failure catch (e) {
+      emit(state.copyWith(status: AuthStatus.error, errorMessage: e.message));
+    } catch (e) {
+      emit(state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+      ));
     }
   }
 }

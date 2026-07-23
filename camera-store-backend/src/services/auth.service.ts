@@ -150,6 +150,67 @@ export class AuthService {
     return { message: 'Đổi mật khẩu thành công' };
   }
 
+  async forgotPassword(email: string) {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new NotFoundError('Email không tồn tại trong hệ thống');
+    }
+
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Set expiration time to 5 minutes from now
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 5);
+
+    // Remove any existing OTP for this email
+    await Otp.deleteMany({ email });
+
+    // Save OTP to DB
+    await Otp.create({
+      email,
+      otp,
+      data: { purpose: 'reset_password' },
+      expiresAt,
+    });
+
+    // Send email
+    await emailService.sendForgotPasswordEmail(email, otp);
+
+    return { message: 'Mã xác thực khôi phục mật khẩu đã được gửi đến email của bạn' };
+  }
+
+  async resetPassword(data: { email: string; otp: string; newPassword?: string }) {
+    const { email, otp, newPassword } = data;
+
+    if (!newPassword) {
+      throw new ConflictError('Vui lòng cung cấp mật khẩu mới');
+    }
+
+    // Find valid OTP
+    const otpRecord = await Otp.findOne({ email, otp });
+    if (!otpRecord) {
+      throw new UnauthorizedError('Mã xác thực không hợp lệ hoặc đã hết hạn');
+    }
+
+    if (otpRecord.data?.purpose !== 'reset_password') {
+      throw new UnauthorizedError('Mã xác thực không đúng mục đích');
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new NotFoundError('Không tìm thấy người dùng');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    // Delete OTP after successful reset
+    await Otp.deleteMany({ email });
+
+    return { message: 'Đặt lại mật khẩu thành công' };
+  }
+
   private generateToken(user: IUser): string {
     return jwt.sign(
       { id: user._id, email: user.email, role: user.role },

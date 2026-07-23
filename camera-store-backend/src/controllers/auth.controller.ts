@@ -63,3 +63,23 @@ export const changePassword = async (req: IAuthRequest, _res: Response, next: Ne
     next(error);
   }
 };
+
+// POST /api/auth/forgot-password
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await authService.forgotPassword(req.body.email);
+    res.status(200).json({ success: true, message: data.message });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/auth/reset-password
+export const resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await authService.resetPassword(req.body);
+    res.status(200).json({ success: true, message: data.message });
+  } catch (error) {
+    next(error);
+  }
+};

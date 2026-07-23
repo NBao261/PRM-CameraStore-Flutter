@@ -5,6 +5,7 @@ import Notification from '../models/Notification';
 import Product from '../models/Product';
 import Coupon from '../models/Coupon';
 import { NotFoundError, ValidationError } from '../utils/errors';
+import emailService from './email.service';
 
 export class OrderService {
   async createOrder(
@@ -269,6 +270,11 @@ export class OrderService {
     }
 
     await order.save();
+
+    const user = await User.findById(userId);
+    if (user) {
+      await emailService.sendOrderDeliveredEmail(user.email, String(order._id), order.total);
+    }
 
     // Notify user
     const notification = await Notification.create({

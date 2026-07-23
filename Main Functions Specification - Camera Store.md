@@ -26,8 +26,8 @@ Nhóm cần thiết kế cấu trúc dữ liệu và REST API để phục vụ 
 | Notification     | Lưu thông báo khuyến mãi, cập nhật đơn hàng, thông báo hệ thống, thông báo từ cửa hàng                                                                                                                                               |
 | Store Location   | Lưu thông tin vị trí cửa hàng để hiển thị trên bản đồ                                                                                                                                                                                |
 | Chat Message     | Lưu nội dung tin nhắn giữa khách hàng và nhân viên hỗ trợ                                                                                                                                                                            |
-| Coupon           | Lưu mã khuyến mãi: code (unique), loại giảm (percent/fixed), giá trị giảm, đơn tối thiểu, giảm tối đa, ngày hết hạn, giới hạn lượt dùng, số lượt đã dùng, trạng thái active/inactive                                                   |
-| Review           | Lưu đánh giá sản phẩm: user_id, product_id, order_id, rating (1-5), comment, ngày tạo                                                                                                                                               |
+| Coupon           | Lưu mã khuyến mãi: code (unique), loại giảm (percent/fixed), giá trị giảm, đơn tối thiểu, giảm tối đa, ngày hết hạn, giới hạn lượt dùng, số lượt đã dùng, trạng thái active/inactive                                                 |
+| Review           | Lưu đánh giá sản phẩm: user_id, product_id, order_id, rating (1-5), comment, ngày tạo                                                                                                                                                |
 
 ### REST API Endpoints chính
 

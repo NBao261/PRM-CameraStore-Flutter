@@ -6,6 +6,7 @@ import Product from '../models/Product';
 import { ApiResponse } from '../utils/response';
 import { NotFoundError, ValidationError } from '../utils/errors';
 import { IAuthRequest } from '../types';
+import emailService from '../services/email.service';
 
 // GET /api/admin/orders?status=pending&page=1&limit=20
 export const getAllOrders = async (req: IAuthRequest, res: Response, next: NextFunction): Promise<void> => {
@@ -77,6 +78,13 @@ export const updateOrderStatus = async (req: IAuthRequest, res: Response, next: 
     }
 
     await order.save();
+
+    if (status === 'delivered') {
+      const user = await User.findById(order.user);
+      if (user) {
+        await emailService.sendOrderDeliveredEmail(user.email, String(order._id), order.total);
+      }
+    }
 
     // Notify the customer
     const statusLabels: Record<string, string> = {

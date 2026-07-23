@@ -107,6 +107,32 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _remoteDataSource.forgotPassword(email);
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+  }) async {
+    try {
+      await _remoteDataSource.resetPassword(
+        email: email,
+        otp: otp,
+        newPassword: newPassword,
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  @override
   Future<void> logout() async {
     await _apiClient.deleteToken();
   }

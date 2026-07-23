@@ -3,6 +3,8 @@ import '../../features/main/presentation/screens/main_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/verify_otp_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/product/presentation/screens/product_list_screen.dart';
 import '../../features/product/presentation/screens/product_detail_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
@@ -21,6 +23,8 @@ class AppRouter {
   static const String login = '/login';
   static const String register = '/register';
   static const String verifyOtp = '/verify-otp';
+  static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
   static const String home = '/home';
   static const String productDetail = '/product-detail';
   static const String cart = '/cart';
@@ -42,6 +46,12 @@ class AppRouter {
       case verifyOtp:
         final email = settings.arguments as String;
         return MaterialPageRoute(builder: (_) => VerifyOtpScreen(email: email));
+      case forgotPassword:
+        return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
+      case resetPassword:
+        final email = settings.arguments as String;
+        return MaterialPageRoute(
+            builder: (_) => ResetPasswordScreen(email: email));
       case home:
         return MaterialPageRoute(builder: (_) => const MainScreen());
       case productDetail:

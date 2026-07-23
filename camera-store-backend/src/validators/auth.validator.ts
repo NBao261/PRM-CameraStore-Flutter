@@ -33,3 +33,13 @@ export const changePasswordValidator = [
   body('oldPassword').notEmpty().withMessage('Mật khẩu cũ là bắt buộc'),
   body('newPassword').isLength({ min: 6 }).withMessage('Mật khẩu mới phải có ít nhất 6 ký tự'),
 ];
+
+export const forgotPasswordValidator = [
+  body('email').isEmail().withMessage('Email không hợp lệ').normalizeEmail(),
+];
+
+export const resetPasswordValidator = [
+  body('email').isEmail().withMessage('Email không hợp lệ').normalizeEmail(),
+  body('otp').isLength({ min: 6, max: 6 }).withMessage('Mã OTP phải có 6 chữ số'),
+  body('newPassword').isLength({ min: 6 }).withMessage('Mật khẩu mới phải có ít nhất 6 ký tự'),
+];
