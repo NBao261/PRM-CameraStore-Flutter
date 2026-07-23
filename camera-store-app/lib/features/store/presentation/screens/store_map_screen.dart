@@ -102,8 +102,8 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
     final lng = _store!.longitude;
     final name = Uri.encodeComponent(_store!.name);
 
-    final webUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
-    final nativeUrl = Uri.parse('geo:$lat,$lng?q=$lat,$lng($name)');
+    final webUrl = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+    final nativeUrl = Uri.parse('google.navigation:q=$lat,$lng');
 
     try {
       // 1. Try launching native Google Maps app
