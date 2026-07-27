@@ -80,12 +80,13 @@ class AdminOrderBloc extends Bloc<AdminOrderEvent, AdminOrderState> {
   ) async {
     emit(state.copyWith(status: AdminOrderStatus.updating));
     try {
-      await _repository.updateOrderStatus(event.orderId, event.newStatus);
+      final updatedOrder = await _repository.updateOrderStatus(event.orderId, event.newStatus);
       emit(state.copyWith(
         status: AdminOrderStatus.loaded,
         successMessage: 'Cập nhật trạng thái thành công',
+        updatedOrder: updatedOrder,
       ));
-      // Reload orders
+      // Reload list in background
       add(const AdminOrderLoadAll());
     } catch (e) {
       emit(state.copyWith(

@@ -97,23 +97,26 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
 
   Future<void> _openInGoogleMaps() async {
     if (_store == null) return;
-    
+
     final lat = _store!.latitude;
     final lng = _store!.longitude;
     final name = Uri.encodeComponent(_store!.name);
 
-    final webUrl = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+    final webUrl = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
     final nativeUrl = Uri.parse('google.navigation:q=$lat,$lng');
 
     try {
       // 1. Try launching native Google Maps app
-      bool launched = await launchUrl(nativeUrl, mode: LaunchMode.externalApplication);
-      
+      bool launched =
+          await launchUrl(nativeUrl, mode: LaunchMode.externalApplication);
+
       // 2. Fallback to web URL in external browser
       if (!launched) {
-        launched = await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+        launched =
+            await launchUrl(webUrl, mode: LaunchMode.externalApplication);
       }
-      
+
       // 3. Fallback to platform default (which might be in-app browser)
       if (!launched) {
         await launchUrl(webUrl, mode: LaunchMode.platformDefault);
@@ -126,7 +129,8 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Thiết bị chưa cài đặt ứng dụng Bản đồ hoặc Trình duyệt.'),
+              content: Text(
+                  'Thiết bị chưa cài đặt ứng dụng Bản đồ hoặc Trình duyệt.'),
               backgroundColor: Colors.red,
             ),
           );
@@ -159,7 +163,8 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
             onPressed: _store != null ? _centerOnStore : null,
             icon: Icon(
               Icons.store_rounded,
-              color: _store != null ? const Color(0xFF4285F4) : AppColors.textHint,
+              color:
+                  _store != null ? const Color(0xFF4285F4) : AppColors.textHint,
             ),
             tooltip: 'Tìm cửa hàng',
           ),
@@ -233,8 +238,7 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
             ),
             children: [
               TileLayer(
-                urlTemplate:
-                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.camera_store_app',
                 maxZoom: 19,
               ),
@@ -265,8 +269,7 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
                               borderRadius: BorderRadius.circular(6),
                               boxShadow: [
                                 BoxShadow(
-                                  color:
-                                      Colors.black.withValues(alpha: 0.12),
+                                  color: Colors.black.withValues(alpha: 0.12),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -294,8 +297,7 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
                         decoration: BoxDecoration(
                           color: const Color(0xFF4285F4),
                           shape: BoxShape.circle,
-                          border:
-                              Border.all(color: Colors.white, width: 3),
+                          border: Border.all(color: Colors.white, width: 3),
                           boxShadow: [
                             BoxShadow(
                               color: const Color(0xFF4285F4)
@@ -357,8 +359,7 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     _store!.name,
@@ -395,8 +396,7 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
                           value: _store!.phone,
                           valueColor: const Color(0xFF4285F4),
                         ),
-                        const Divider(
-                            height: 1, color: Color(0xFFEEEEEE)),
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
 
                         // Working Hours
                         _InfoListTile(
@@ -405,8 +405,7 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
                           label: 'Working Hours',
                           value: _store!.openingHours,
                         ),
-                        const Divider(
-                            height: 1, color: Color(0xFFEEEEEE)),
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
 
                         // Address
                         _InfoListTile(
@@ -424,8 +423,8 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
                           height: 52,
                           child: ElevatedButton.icon(
                             onPressed: _openInGoogleMaps,
-                            icon: const Icon(Icons.navigation_rounded,
-                                size: 20),
+                            icon:
+                                const Icon(Icons.navigation_rounded, size: 20),
                             label: const Text(
                               'Open in Google Maps',
                               style: TextStyle(

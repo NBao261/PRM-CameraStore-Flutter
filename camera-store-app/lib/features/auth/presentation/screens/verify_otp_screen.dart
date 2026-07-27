@@ -53,9 +53,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                 backgroundColor: AppColors.success,
               ),
             );
-            // Navigate to Login and clear all previous routes
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/login', (route) => false);
+            // Navigate back to the root (LoginScreen)
+            Navigator.of(context).popUntil((route) => route.isFirst);
           }
           if (state.status == AuthStatus.error && state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(

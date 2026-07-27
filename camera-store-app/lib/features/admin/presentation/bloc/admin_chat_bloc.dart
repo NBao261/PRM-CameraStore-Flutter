@@ -89,9 +89,26 @@ class AdminChatBloc extends Bloc<AdminChatEvent, AdminChatState> {
       );
       final updatedMessages = List<Map<String, dynamic>>.from(state.messages)
         ..add(Map<String, dynamic>.from(msgData));
+        
+      // Update the conversation list to bring it to top
+      List<Map<String, dynamic>> newConversations = List.from(state.conversations);
+      final index = newConversations.indexWhere(
+          (c) => c['conversationId'] == event.conversationId);
+
+      if (index != -1) {
+        final conv = Map<String, dynamic>.from(newConversations[index]);
+        conv['lastMessage'] = event.content;
+        conv['lastSenderRole'] = 'support';
+        conv['lastMessageAt'] = msgData['createdAt'];
+        conv['messageCount'] = (conv['messageCount'] as int? ?? 0) + 1;
+        newConversations.removeAt(index);
+        newConversations.insert(0, conv);
+      }
+
       emit(state.copyWith(
         status: AdminChatStatus.loaded,
         messages: updatedMessages,
+        conversations: newConversations,
       ));
     } catch (e) {
       emit(state.copyWith(
@@ -124,11 +141,39 @@ class AdminChatBloc extends Bloc<AdminChatEvent, AdminChatState> {
         }
       }
 
-      // In a real app we'd also update the conversation list to bring it to top
+      // Update the conversation list to bring it to top
+      List<Map<String, dynamic>> newConversations = List.from(state.conversations);
+      final index = newConversations.indexWhere(
+          (c) => c['conversationId'] == message['conversationId']);
+
+      if (index != -1) {
+        final conv = Map<String, dynamic>.from(newConversations[index]);
+        conv['lastMessage'] = message['content'];
+        conv['lastSenderRole'] = message['senderRole'];
+        conv['lastMessageAt'] = message['createdAt'];
+        conv['messageCount'] = (conv['messageCount'] as int? ?? 0) + 1;
+        newConversations.removeAt(index);
+        newConversations.insert(0, conv);
+      } else {
+        // New conversation
+        final sender = message['sender'];
+        if (sender != null && sender is Map) {
+          final newConv = {
+            'conversationId': message['conversationId'],
+            'user': sender,
+            'lastMessage': message['content'],
+            'lastSenderRole': message['senderRole'],
+            'lastMessageAt': message['createdAt'],
+            'messageCount': 1,
+          };
+          newConversations.insert(0, newConv);
+        }
+      }
 
       emit(state.copyWith(
         unreadCount: newUnreadCount,
         messages: newMessages,
+        conversations: newConversations,
       ));
     } catch (_) {}
   }

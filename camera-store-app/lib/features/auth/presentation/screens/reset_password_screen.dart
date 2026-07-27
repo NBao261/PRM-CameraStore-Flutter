@@ -60,8 +60,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 backgroundColor: AppColors.success,
               ),
             );
-            // Navigate back to Login Screen
-            Navigator.of(context).popUntil((route) => route.settings.name == '/login');
+            // Navigate back to the root (LoginScreen)
+            Navigator.of(context).popUntil((route) => route.isFirst);
           } else if (state.status == AuthStatus.error && state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

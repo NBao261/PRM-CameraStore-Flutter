@@ -8,6 +8,7 @@ class AdminOrderState extends Equatable {
   final Map<String, dynamic>? dashboard;
   final String? errorMessage;
   final String? successMessage;
+  final Map<String, dynamic>? updatedOrder;
 
   const AdminOrderState({
     this.status = AdminOrderStatus.initial,
@@ -15,6 +16,7 @@ class AdminOrderState extends Equatable {
     this.dashboard,
     this.errorMessage,
     this.successMessage,
+    this.updatedOrder,
   });
 
   AdminOrderState copyWith({
@@ -23,6 +25,8 @@ class AdminOrderState extends Equatable {
     Map<String, dynamic>? dashboard,
     String? errorMessage,
     String? successMessage,
+    Map<String, dynamic>? updatedOrder,
+    bool clearUpdatedOrder = false,
   }) {
     return AdminOrderState(
       status: status ?? this.status,
@@ -30,9 +34,10 @@ class AdminOrderState extends Equatable {
       dashboard: dashboard ?? this.dashboard,
       errorMessage: errorMessage,
       successMessage: successMessage,
+      updatedOrder: clearUpdatedOrder ? null : (updatedOrder ?? this.updatedOrder),
     );
   }
 
   @override
-  List<Object?> get props => [status, orders, dashboard, errorMessage, successMessage];
+  List<Object?> get props => [status, orders, dashboard, errorMessage, successMessage, updatedOrder];
 }
